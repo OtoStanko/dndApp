@@ -5,15 +5,30 @@ enum Classes {
 }
 
 class Character {
-  late String charImgPath;
-  late String charName;
-  late Classes charClass;
-  late int charLvl;
+  final int id;
+  final String charName;
+  final int charClass;
+  final int charLvl;
 
-  Character(String imgPath, String name, Classes cls, int lvl) {
-    charImgPath = imgPath;
-    charName = name;
-    charClass = cls;
-    charLvl = lvl;
+  const Character( {
+    required this.id,
+    required this.charName,
+    required this.charClass,
+    required this.charLvl,
+  });
+
+Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': charName,
+      'class': charClass,
+      'level': charLvl,
+    };
   }
+
+@override
+  String toString() {
+    return 'Dog{id: $id, name: $charName, class: ${Classes.values[charClass]}, lvl: $charLvl}';
+  }
+
 }

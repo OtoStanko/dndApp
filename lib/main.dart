@@ -1,6 +1,8 @@
 //import 'dart:html';
-import "string_extension.dart";
 import "character.dart";
+import "characters_database.dart";
+
+
 
 import 'package:flutter/material.dart';
 const double dividerWidth = 20;
@@ -26,19 +28,18 @@ class _MyAppState extends StatefulWidget {
   State<_MyAppState> createState() => _MyAppStateState();
 }
 
+
+
 class _MyAppStateState extends State<_MyAppState> {
 
 int skreeLvl = 10;
 int druidLvl = 11;
 
-List<Character> characters = [
-  Character("images/Druid_dragonborn_green.jpg", "Skreee", Classes.druid, 10),
-  Character("images/bear.jpg", "Druid number 2", Classes.fighter, 11),
-  Character("images/bear.jpg", "Darastrix", Classes.barbarian, 10),
-];
 
   @override
   Widget build(BuildContext context) {
+    CharactersDatabase database =  CharactersDatabase();
+    List<Character> characters = database.getCharacters() as List<Character>;
     return MaterialApp(
       home: Scaffold(
           appBar: AppBar(
@@ -52,8 +53,8 @@ List<Character> characters = [
               children: characters.map((character) {
                 return Column( children: [Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: AssetImage(character.charImgPath),
+                    const CircleAvatar(
+                      backgroundImage: AssetImage("images/bear.jpg"),
                       radius: 20,
                     ),
                     const VerticalDivider(
@@ -66,7 +67,7 @@ List<Character> characters = [
                     const VerticalDivider(
                       width: dividerWidth,
                     ),
-                    Text( "${character.charClass.name.capitalize()} lvl ${character.charLvl}"),
+                    Text( "${Classes.values[character.charClass]} lvl ${character.charLvl}"),
                   ],
                 ),
                 const Divider(height: 40,),]
