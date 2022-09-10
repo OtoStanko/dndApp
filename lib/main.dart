@@ -1,9 +1,12 @@
 //import 'dart:html';
-import "string_extension.dart";
+//import "string_extension.dart";
 import "character.dart";
+import "characters_database.dart";
 
 import 'package:flutter/material.dart';
 const double dividerWidth = 20;
+
+
 void main() {
   runApp(const MyApp());
 }
@@ -30,12 +33,28 @@ class _MyAppStateState extends State<_MyAppState> {
 
 int skreeLvl = 10;
 int druidLvl = 11;
+late List<Character> characters;
 
-List<Character> characters = [
+/*List<Character> characters = [
   Character("images/Druid_dragonborn_green.jpg", "Skreee", Classes.druid, 10),
   Character("images/bear.jpg", "Druid number 2", Classes.fighter, 11),
   Character("images/bear.jpg", "Darastrix", Classes.barbarian, 10),
-];
+];*/
+
+  @override
+  void initState() {
+    super.initState();
+    refrestCharacters();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future refrestCharacters() async {
+    characters = await CharacterDatabase.instance.readAllCharacters();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +71,8 @@ List<Character> characters = [
               children: characters.map((character) {
                 return Column( children: [Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: AssetImage(character.charImgPath),
+                    const CircleAvatar(
+                      backgroundImage: AssetImage("images/bear.jpg"),
                       radius: 20,
                     ),
                     const VerticalDivider(
@@ -66,7 +85,7 @@ List<Character> characters = [
                     const VerticalDivider(
                       width: dividerWidth,
                     ),
-                    Text( "${character.charClass.name.capitalize()} lvl ${character.charLvl}"),
+                    Text( "${character.charClass} lvl ${character.charLvl}"),
                   ],
                 ),
                 const Divider(height: 40,),]
