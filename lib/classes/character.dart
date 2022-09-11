@@ -1,10 +1,7 @@
-enum Classes {
-  druid,
-  fighter,
-  barbarian,
-}
+import 'package:firstapp/enums/classes.dart';
 
 class Character {
+  late int id;
   late String charImgPath;
   late String charName;
   late Classes charClass;
