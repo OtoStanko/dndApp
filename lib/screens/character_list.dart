@@ -73,7 +73,7 @@ class CharacterList extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const AddScreen(),
+                    builder: (_) => AddScreen(),
                   ));
             },
             child: const Icon(Icons.add),
