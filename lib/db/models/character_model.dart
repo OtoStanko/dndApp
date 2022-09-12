@@ -1,28 +1,27 @@
 class Character {
-  final int id;
-  final String name;
-  final int age;
+  int id;
+  final String iconPath;
+  final String characterName;
+  final String characterClass;
 
-  const Character({
+  Character({
     required this.id,
-    required this.name,
-    required this.age,
+    required this.characterName,
+    required this.characterClass,
+    required this.iconPath,
   });
 
-  // Convert a Dog into a Map. The keys must correspond to the names of the
-  // columns in the database.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name,
-      'age': age,
+      'characterName': characterName,
+      'characterClass': characterClass,
+      'iconPath': iconPath
     };
   }
 
-  // Implement toString to make it easier to see information about
-  // each dog when using the print statement.
   @override
   String toString() {
-    return 'Character{id: $id, name: $name, age: $age}';
+    return 'Character{id: $id, name: $characterName, class: $characterClass, icon: $iconPath}';
   }
 }

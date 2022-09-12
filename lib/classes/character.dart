@@ -1,16 +1,17 @@
-import 'package:firstapp/enums/classes.dart';
+import 'package:firstapp/db/models/character_model.dart' as models;
 
-class Character {
-  late int id;
-  late String charImgPath;
-  late String charName;
-  late Classes charClass;
-  late int charLvl;
+class Character extends models.Character {
+  final int characterLevel;
 
-  Character(String imgPath, String name, Classes cls, int lvl) {
-    charImgPath = imgPath;
-    charName = name;
-    charClass = cls;
-    charLvl = lvl;
+  Character(
+      {required super.id,
+      required super.characterName,
+      required super.characterClass,
+      required super.iconPath,
+      required this.characterLevel});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return super.toMap().putIfAbsent("characterLevel", () => characterLevel);
   }
 }
