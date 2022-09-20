@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/screens/add_character.dart';
@@ -29,12 +31,15 @@ class _CharacterList extends State<CharacterList> {
   }
 
   List<Card> getCharacters() {
+    final colors = Colors.primaries.toList();
     return _characters.map((e) {
+      colors.shuffle();
       return Card(
         child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: AssetImage(e.iconPath),
               radius: 20,
+              backgroundColor: colors.first,
+              child: Text(e.characterName.substring(0, 2).toUpperCase()),
             ),
             title: Text(e.characterName, style: const TextStyle(fontSize: 40)),
             onTap: () {

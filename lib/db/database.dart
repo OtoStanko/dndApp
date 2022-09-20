@@ -21,7 +21,7 @@ class Database {
       join(await sq.getDatabasesPath(), "$sqliteDBName.db"),
       onCreate: (db, version) {
         db.execute(
-          'CREATE TABLE $sqliteCharactersTableName(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, iconPath TEXT, characterName TEXT, characterClass TEXT, characterLevel INTEGER DEFAULT 0)',
+          'CREATE TABLE $sqliteCharactersTableName(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, iconPath TEXT, characterName TEXT, characterClass TEXT, characterLevel INTEGER DEFAULT 1)',
         );
         return _initCharacters();
       },
@@ -30,29 +30,13 @@ class Database {
   }
 
   void _initCharacters() async {
-    var chars = [
-      Character(
+    const int number = 20;
+    for (var i = 0; i < number; i++) {
+      Character character = Character(
           id: -1,
           iconPath: "images/bear.jpg",
-          characterName: "Bér",
-          characterClass: Classes.barbarian.name.toString()),
-      Character(
-          id: -1,
-          iconPath: "images/bear.jpg",
-          characterName: "Bér",
-          characterClass: Classes.barbarian.name.toString()),
-      Character(
-          id: -1,
-          iconPath: "images/bear.jpg",
-          characterName: "Bér_2",
-          characterClass: Classes.barbarian.name.toString()),
-      Character(
-          id: -1,
-          iconPath: "images/bear.jpg",
-          characterName: "Béry?",
-          characterClass: Classes.barbarian.name.toString()),
-    ];
-    for (var character in chars) {
+          characterName: "Bear-${i}",
+          characterClass: Classes.barbarian.name.toString());
       insertCharacter(character);
     }
   }
