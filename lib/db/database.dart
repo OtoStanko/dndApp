@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firstapp/db/init/init_database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/classes/character.dart' as classes;
 import 'package:firstapp/enums/classes.dart';
@@ -20,9 +21,7 @@ class Database {
     return sq.openDatabase(
       join(await sq.getDatabasesPath(), "$sqliteDBName.db"),
       onCreate: (db, version) {
-        db.execute(
-          'CREATE TABLE $sqliteCharactersTableName(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, iconPath TEXT, characterName TEXT, characterClass TEXT, characterLevel INTEGER DEFAULT 1)',
-        );
+        initDatabase(db);
         return _initCharacters();
       },
       version: 1,
