@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:firstapp/classes/character.dart' as classes;
+import 'package:firstapp/classes/classes.dart';
 import 'package:firstapp/db/init/init_database.dart';
 import 'package:firstapp/db/models/character_model.dart';
-import 'package:firstapp/classes/character.dart' as classes;
-import 'package:firstapp/enums/classes.dart';
+import 'package:firstapp/db/models/class_model.dart';
 import 'package:firstapp/static/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
@@ -22,7 +23,7 @@ class Database {
       join(await sq.getDatabasesPath(), "$sqliteDBName.db"),
       onCreate: (db, version) {
         initDatabase(db);
-        return _initCharacters();
+        // return _initCharacters();
       },
       version: 1,
     );
@@ -35,7 +36,7 @@ class Database {
           id: -1,
           iconPath: "images/bear.jpg",
           characterName: "Bear-${i}",
-          characterClass: Classes.barbarian.name.toString());
+          characterClass: Classes().getClass("Fighter"));
       insertCharacter(character);
     }
   }
@@ -66,17 +67,36 @@ class Database {
 
   Future<List<Character>> characters() async {
     final db = await database;
+    final classes = await Classes().getClasses();
 
     final List<Map<String, dynamic>> maps = await db.query(
         sqliteCharactersTableName,
         columns: ["id", "iconPath", "characterName", "characterClass"]);
 
     var items = List.generate(maps.length, (i) {
+      var c = classes["${maps[i]['characterClass']}"] ??
+          Class(id: -1, className: "Default", classDescription: "Default");
       return Character(
+          id: maps[i]['id'],
+          characterName: maps[i]['characterName'],
+          iconPath: maps[i]['iconPath'],
+          characterClass: c);
+    });
+    return items;
+  }
+
+  Future<List<Class>> characterClasses() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+        sqliteCharacterClassTableName,
+        columns: ["id", "className", "classDescription"]);
+
+    var items = List.generate(maps.length, (i) {
+      return Class(
         id: maps[i]['id'],
-        characterName: maps[i]['characterName'],
-        iconPath: maps[i]['iconPath'],
-        characterClass: maps[i]['characterClass'],
+        className: maps[i]['className'],
+        classDescription: maps[i]['classDescription'],
       );
     });
     return items;
@@ -84,15 +104,19 @@ class Database {
 
   Future<classes.Character> getCharacter(int id) async {
     final db = await database;
+    final cl = await Classes().getClasses();
 
     final List<Map<String, dynamic>> map = await db
         .query(sqliteCharactersTableName, where: 'id = ?', whereArgs: [id]);
+
+    var c = cl["${map[0]['characterClass']}"] ??
+        Class(id: -1, className: "Default", classDescription: "Default");
 
     return classes.Character(
       id: map[0]['id'],
       characterName: map[0]['characterName'],
       iconPath: map[0]['iconPath'],
-      characterClass: map[0]['characterClass'],
+      characterClass: c,
       characterLevel: map[0]['characterLevel'],
     );
   }

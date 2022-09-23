@@ -1,3 +1,7 @@
+import 'package:firstapp/classes/character.dart';
+import 'package:firstapp/classes/classes.dart';
+import 'package:firstapp/db/database.dart';
+import 'package:firstapp/db/models/class_model.dart';
 import 'package:firstapp/static/constants.dart';
 import 'package:firstapp/widgets/dropdown.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +15,15 @@ class AddCharacter extends StatefulWidget {
 }
 
 class _AddCharacter extends State<AddCharacter> {
+  final _classes = Classes();
   final _formKey = GlobalKey<FormState>();
+
+  Character newCharacter = Character(
+      id: -1,
+      characterName: "",
+      characterClass: Class(className: "", id: -1, classDescription: ""),
+      iconPath: "",
+      characterLevel: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +40,11 @@ class _AddCharacter extends State<AddCharacter> {
                   Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TextFormField(
+                        onChanged: (val) {
+                          setState(() {
+                            newCharacter.characterName = val;
+                          });
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return nameInputError;
@@ -39,9 +56,9 @@ class _AddCharacter extends State<AddCharacter> {
                           labelText: 'Name',
                         ),
                       )),
-                  const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Dropdown(classes:["class", "sdsasd"])),
+                  Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Dropdown(classes: _classes.getClassesNames())),
                   Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TextFormField(
@@ -61,18 +78,23 @@ class _AddCharacter extends State<AddCharacter> {
                             border: OutlineInputBorder(),
                             labelText: 'Level',
                             hintText: "0"),
+                        onChanged: (val) {
+                          setState(() {
+                            var num = int.tryParse(val);
+                            if (num == null) return;
+                            newCharacter.characterLevel = num;
+                          });
+                        },
                       )),
                   Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          // Validate returns true if the form is valid, or false otherwise.
                           if (_formKey.currentState!.validate()) {
-                            // If the form is valid, display a snackbar. In the real world,
-                            // you'd often call a server or save the information in a database.
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Processing Data')),
+                              SnackBar(content: Text(newCharacter.toString())),
                             );
+                            Database().insertCharacter(newCharacter);
                           }
                         },
                         child: const Text("Create a character"),

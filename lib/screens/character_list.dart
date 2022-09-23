@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/screens/add_character.dart';
@@ -49,7 +47,7 @@ class _CharacterList extends State<CharacterList> {
                     builder: (_) => ViewCharacter(characterId: e.id),
                   ));
             },
-            trailing: Text(e.characterClass,
+            trailing: Text(e.characterClass.className,
                 style: const TextStyle(color: Colors.black38))),
       );
     }).toList();

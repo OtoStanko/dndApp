@@ -6,7 +6,7 @@ import 'package:sqflite/sqlite_api.dart';
 // key in init.sql file : value which should be replaced with
 var pairs = <dynamic, dynamic>{
   "charactersTable": sqliteCharactersTableName,
-  "classesTable": "classes",
+  "classesTable": sqliteCharacterClassTableName,
 };
 
 void initDatabase(Database database) async {

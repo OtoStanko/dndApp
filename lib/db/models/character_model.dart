@@ -1,8 +1,10 @@
+import 'package:firstapp/db/models/class_model.dart';
+
 class Character {
   int id;
-  final String iconPath;
-  final String characterName;
-  final String characterClass;
+  String iconPath;
+  String characterName;
+  Class characterClass;
 
   Character({
     required this.id,
@@ -15,7 +17,7 @@ class Character {
     return {
       'id': id,
       'characterName': characterName,
-      'characterClass': characterClass,
+      'characterClass': characterClass.id,
       'iconPath': iconPath
     };
   }

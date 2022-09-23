@@ -1,7 +1,7 @@
 import 'package:firstapp/db/models/character_model.dart' as models;
 
 class Character extends models.Character {
-  final int characterLevel;
+  int characterLevel;
 
   Character(
       {required super.id,

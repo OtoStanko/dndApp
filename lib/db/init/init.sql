@@ -11,3 +11,14 @@ CREATE TABLE [classesTable] (
     className TEXT NOT NULL,
     classDescription TEXT NOT NULL
 );
+INSERT INTO [classesTable] (className, classDescription)
+VALUES('Barbarian', 'ARRGHHH!!!!');
+INSERT INTO [classesTable] (className, classDescription)
+VALUES('Rouge', 'Sneak attack!');
+INSERT INTO [classesTable] (className, classDescription)
+VALUES('Fighter', 'Hack and slash!');
+INSERT INTO [classesTable] (className, classDescription)
+VALUES('Wizard', 'Višard!');
+
+
+INSERT INTO [charactersTable] (iconPath, characterName, characterClass, characterLevel) VALUES('', 'TEST', 0, '19')
