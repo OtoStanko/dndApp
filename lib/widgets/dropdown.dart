@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class Dropdown extends StatefulWidget {
   final Future<List<String>> classes;
-  const Dropdown({super.key, required this.classes});
+  final Function onChanged;
+  const Dropdown({super.key, required this.classes, required this.onChanged});
 
   @override
   State<Dropdown> createState() => _DropdownState();
@@ -45,6 +46,7 @@ class _DropdownState extends State<Dropdown> {
             // This is called when the user selects an item.
             setState(() {
               dropdownValue = value!;
+              widget.onChanged(value);
             });
           },
           items: _classes.map<DropdownMenuItem<String>>((String value) {

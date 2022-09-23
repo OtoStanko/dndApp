@@ -1,5 +1,6 @@
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
+import 'package:firstapp/extensions/string_extension.dart';
 import 'package:firstapp/screens/add_character.dart';
 import 'package:firstapp/screens/view_character.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +20,17 @@ class _CharacterList extends State<CharacterList> {
     return await Database().characters();
   }
 
-  _CharacterList() {
+  _reloadCharacters() {
     _init().then((value) {
       setState(() {
         _characters = value;
         _loaded = true;
       });
     });
+  }
+
+  _CharacterList() {
+    _reloadCharacters();
   }
 
   List<Card> getCharacters() {
@@ -39,7 +44,11 @@ class _CharacterList extends State<CharacterList> {
               backgroundColor: colors.first,
               child: Text(e.characterName.substring(0, 2).toUpperCase()),
             ),
-            title: Text(e.characterName, style: const TextStyle(fontSize: 40)),
+            title: Text(
+              e.characterName,
+              style: const TextStyle(fontSize: 40),
+              overflow: TextOverflow.ellipsis,
+            ),
             onTap: () {
               Navigator.push(
                   context,
@@ -78,11 +87,14 @@ class _CharacterList extends State<CharacterList> {
                 child: ListView(children: getCharacters())),
             floatingActionButton: FloatingActionButton(
               backgroundColor: Colors.green,
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddCharacter(),
-                  )),
+              onPressed: () async {
+                final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AddCharacter()));
+                // Reload character list
+                _reloadCharacters();
+              },
               child: const Icon(Icons.add),
             )));
   }

@@ -1,7 +1,6 @@
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/classes/classes.dart';
 import 'package:firstapp/db/database.dart';
-import 'package:firstapp/db/models/class_model.dart';
 import 'package:firstapp/static/constants.dart';
 import 'package:firstapp/widgets/dropdown.dart';
 import 'package:flutter/material.dart';
@@ -18,12 +17,15 @@ class _AddCharacter extends State<AddCharacter> {
   final _classes = Classes();
   final _formKey = GlobalKey<FormState>();
 
-  Character newCharacter = Character(
-      id: -1,
-      characterName: "",
-      characterClass: Class(className: "", id: -1, classDescription: ""),
-      iconPath: "",
-      characterLevel: 0);
+  Character newCharacter = emptyCharacter;
+
+  _AddCharacter() {
+    _initCharacter();
+  }
+
+  _initCharacter() async {
+    newCharacter.characterClass = await _classes.getClassById(1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,12 @@ class _AddCharacter extends State<AddCharacter> {
                       )),
                   Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Dropdown(classes: _classes.getClassesNames())),
+                      child: Dropdown(
+                          classes: _classes.getClassesNames(),
+                          onChanged: (value) async {
+                            newCharacter.characterClass =
+                                await _classes.getClass(value);
+                          })),
                   Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TextFormField(
@@ -91,10 +98,8 @@ class _AddCharacter extends State<AddCharacter> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(newCharacter.toString())),
-                            );
-                            Database().insertCharacter(newCharacter);
+                            Database().insertCharacter(newCharacter).then(
+                                (value) => {Navigator.pop(context, "OK")});
                           }
                         },
                         child: const Text("Create a character"),

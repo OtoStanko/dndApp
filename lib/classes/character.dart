@@ -12,6 +12,14 @@ class Character extends models.Character {
 
   @override
   Map<String, dynamic> toMap() {
-    return super.toMap().putIfAbsent("characterLevel", () => characterLevel);
+    var superMap = super.toMap();
+    superMap.update("characterLevel", (value) => characterLevel.toString(),
+        ifAbsent: () => characterLevel);
+    return superMap;
+  }
+
+  @override
+  String toString() {
+    return "${super.toString().substring(0, super.toString().length - 1)}, characterLevel: $characterLevel}";
   }
 }

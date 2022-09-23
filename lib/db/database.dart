@@ -29,13 +29,14 @@ class Database {
     );
   }
 
+  @Deprecated("This is deprecated, all initailisation is done in init.sql")
   void _initCharacters() async {
     const int number = 20;
     for (var i = 0; i < number; i++) {
       Character character = Character(
           id: -1,
           iconPath: "images/bear.jpg",
-          characterName: "Bear-${i}",
+          characterName: "Bear-$i",
           characterClass: Classes().getClass("Fighter"));
       insertCharacter(character);
     }
@@ -49,7 +50,7 @@ class Database {
     _database = db;
   }
 
-  Future<void> insertCharacter(Character character) async {
+  Future<Character> insertCharacter(Character character) async {
     final db = await database;
 
     // Allow Auto-incrementing the ID
@@ -63,6 +64,7 @@ class Database {
     );
 
     character.id = id;
+    return character;
   }
 
   Future<List<Character>> characters() async {
@@ -74,7 +76,7 @@ class Database {
         columns: ["id", "iconPath", "characterName", "characterClass"]);
 
     var items = List.generate(maps.length, (i) {
-      var c = classes["${maps[i]['characterClass']}"] ??
+      var c = classes[maps[i]['characterClass']] ??
           Class(id: -1, className: "Default", classDescription: "Default");
       return Character(
           id: maps[i]['id'],
@@ -109,7 +111,7 @@ class Database {
     final List<Map<String, dynamic>> map = await db
         .query(sqliteCharactersTableName, where: 'id = ?', whereArgs: [id]);
 
-    var c = cl["${map[0]['characterClass']}"] ??
+    var c = cl[map[0]['characterClass']] ??
         Class(id: -1, className: "Default", classDescription: "Default");
 
     return classes.Character(

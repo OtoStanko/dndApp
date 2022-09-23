@@ -2,7 +2,7 @@ import 'package:firstapp/db/models/class_model.dart';
 
 class Character {
   int id;
-  String iconPath;
+  String iconPath = "";
   String characterName;
   Class characterClass;
 
@@ -24,6 +24,6 @@ class Character {
 
   @override
   String toString() {
-    return 'Character{id: $id, name: $characterName, class: $characterClass, icon: $iconPath}';
+    return 'Character{id: $id, name: $characterName, class: $characterClass, iconPath: $iconPath}';
   }
 }

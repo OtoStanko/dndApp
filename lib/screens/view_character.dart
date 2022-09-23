@@ -50,15 +50,33 @@ class _ViewCharacter extends State<ViewCharacter> {
           title: Text(_character.characterName),
           backgroundColor: const Color.fromARGB(255, 12, 127, 100),
         ),
-        body: SizedBox(
-            height: 200,
-            child: Row(children: [
-              Expanded(
-                child: Text(_character.characterName,
-                    style: const TextStyle(height: 5, fontSize: 50)),
-              ),
-              Text(_character.characterLevel.toString(),
-                  style: const TextStyle(height: 5, fontSize: 50)),
-            ])));
+        body: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text("Character Id", style: TextStyle(fontSize: 10)),
+                  Text(_character.id.toString(),
+                      style: const TextStyle(fontSize: 30)),
+                  const Text("Character name", style: TextStyle(fontSize: 10)),
+                  Text(_character.characterName,
+                      style: const TextStyle(fontSize: 30)),
+                  const Text("Character level", style: TextStyle(fontSize: 10)),
+                  Text(_character.characterLevel.toString(),
+                      style: const TextStyle(fontSize: 30)),
+                  const Text("Character class", style: TextStyle(fontSize: 10)),
+                  Text(_character.characterClass.className,
+                      style: const TextStyle(fontSize: 30)),
+                  const Text("Class description",
+                      style: TextStyle(fontSize: 10)),
+                  Text(_character.characterClass.classDescription,
+                      style: const TextStyle(fontSize: 30)),
+                  const Text("Icon Path", style: TextStyle(fontSize: 10)),
+                  Text(
+                      _character.iconPath.isNotEmpty
+                          ? _character.iconPath
+                          : "No path provided",
+                      style: const TextStyle(fontSize: 30)),
+                ])));
   }
 }
