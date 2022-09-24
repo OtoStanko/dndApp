@@ -21,4 +21,4 @@ INSERT INTO [classesTable] (className, classDescription)
 VALUES('Wizard', 'Višard!');
 
 
-INSERT INTO [charactersTable] (iconPath, characterName, characterClass, characterLevel) VALUES('', 'TEST', 1, '19')
+INSERT INTO [charactersTable] (iconPath, characterName, characterClass, characterLevel) VALUES('/data/user/0/com.example.firstapp/cache/image_picker4117592116842250004.jpg', 'TEST', 1, '19')

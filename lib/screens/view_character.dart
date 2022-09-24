@@ -1,5 +1,7 @@
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/db/database.dart';
+import 'package:firstapp/screens/view_character_screens/character_sheet.dart';
 import 'package:flutter/material.dart';
 
 class ViewCharacter extends StatefulWidget {
@@ -14,14 +16,14 @@ class _ViewCharacter extends State<ViewCharacter> {
   late Character _character;
   bool _loaded = false;
 
-  Future<Character> _init(int id) async {
-    return await Database().getCharacter(id);
-  }
+  // Page navigator
+  int _currentIndex = 1;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-
+    _pageController = PageController(initialPage: 1);
     // Load character info from database
     _init(widget.characterId).then((value) {
       setState(() {
@@ -29,6 +31,16 @@ class _ViewCharacter extends State<ViewCharacter> {
         _loaded = true;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<Character> _init(int id) async {
+    return await Database().getCharacter(id);
   }
 
   @override
@@ -45,38 +57,50 @@ class _ViewCharacter extends State<ViewCharacter> {
               )));
     }
 
+    // Bottom navigation items
+    var bottomButtons = <BottomNavyBarItem>[
+      BottomNavyBarItem(
+          title: const Text('Character'), icon: const Icon(Icons.person)),
+      BottomNavyBarItem(
+          title: const Text('Features'), icon: const Icon(Icons.apps)),
+      BottomNavyBarItem(
+          title: const Text('Edit'), icon: const Icon(Icons.edit)),
+    ];
+
+    // View screens
+    var viewScreens = <Widget>[
+      CharacterSheet(character: _character),
+      Container(
+        color: Colors.red,
+      ),
+      Container(
+        color: Colors.green,
+      ),
+    ];
+
     return Scaffold(
         appBar: AppBar(
+          leading: const Icon(Icons.person),
           title: Text(_character.characterName),
           backgroundColor: const Color.fromARGB(255, 12, 127, 100),
         ),
-        body: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text("Character Id", style: TextStyle(fontSize: 10)),
-                  Text(_character.id.toString(),
-                      style: const TextStyle(fontSize: 30)),
-                  const Text("Character name", style: TextStyle(fontSize: 10)),
-                  Text(_character.characterName,
-                      style: const TextStyle(fontSize: 30)),
-                  const Text("Character level", style: TextStyle(fontSize: 10)),
-                  Text(_character.characterLevel.toString(),
-                      style: const TextStyle(fontSize: 30)),
-                  const Text("Character class", style: TextStyle(fontSize: 10)),
-                  Text(_character.characterClass.className,
-                      style: const TextStyle(fontSize: 30)),
-                  const Text("Class description",
-                      style: TextStyle(fontSize: 10)),
-                  Text(_character.characterClass.classDescription,
-                      style: const TextStyle(fontSize: 30)),
-                  const Text("Icon Path", style: TextStyle(fontSize: 10)),
-                  Text(
-                      _character.iconPath.isNotEmpty
-                          ? _character.iconPath
-                          : "No path provided",
-                      style: const TextStyle(fontSize: 30)),
-                ])));
+        body: SizedBox.expand(
+          child: PageView(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              onPageChanged: (index) {
+                setState(() => _currentIndex = index);
+              },
+              children: viewScreens),
+        ),
+        bottomNavigationBar: BottomNavyBar(
+          selectedIndex: _currentIndex,
+          animationDuration: const Duration(milliseconds: 200),
+          onItemSelected: (index) {
+            setState(() => _currentIndex = index);
+            _pageController.jumpToPage(index);
+          },
+          items: bottomButtons,
+        ));
   }
 }
