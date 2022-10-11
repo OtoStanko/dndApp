@@ -1,8 +1,9 @@
 import 'package:firstapp/db/models/class_model.dart';
+import 'package:flutter/services.dart';
 
 class Character {
   int id;
-  String iconPath = "";
+  Uint8List? image;
   String characterName;
   Class characterClass;
 
@@ -10,7 +11,7 @@ class Character {
     required this.id,
     required this.characterName,
     required this.characterClass,
-    required this.iconPath,
+    this.image,
   });
 
   Map<String, dynamic> toMap() {
@@ -18,12 +19,12 @@ class Character {
       'id': id,
       'characterName': characterName,
       'characterClass': characterClass.id,
-      'iconPath': iconPath
+      'image': image
     };
   }
 
   @override
   String toString() {
-    return 'Character{id: $id, name: $characterName, class: $characterClass, iconPath: $iconPath}';
+    return 'Character{id: $id, name: $characterName, class: $characterClass, image: $image}';
   }
 }

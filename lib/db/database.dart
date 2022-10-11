@@ -6,6 +6,7 @@ import 'package:firstapp/db/init/init_database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/db/models/class_model.dart';
 import 'package:firstapp/static/constants.dart';
+import 'package:firstapp/utils/utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart' as sq;
@@ -35,7 +36,6 @@ class Database {
     for (var i = 0; i < number; i++) {
       Character character = Character(
           id: -1,
-          iconPath: "images/bear.jpg",
           characterName: "Bear-$i",
           characterClass: Classes().getClass("Fighter"));
       insertCharacter(character);
@@ -73,7 +73,7 @@ class Database {
 
     final List<Map<String, dynamic>> maps = await db.query(
         sqliteCharactersTableName,
-        columns: ["id", "iconPath", "characterName", "characterClass"]);
+        columns: ["id", "image", "characterName", "characterClass"]);
 
     var items = List.generate(maps.length, (i) {
       var c = classes[maps[i]['characterClass']] ??
@@ -81,7 +81,7 @@ class Database {
       return Character(
           id: maps[i]['id'],
           characterName: maps[i]['characterName'],
-          iconPath: maps[i]['iconPath'],
+          image: maps[i]['image'],
           characterClass: c);
     });
     return items;
@@ -117,7 +117,7 @@ class Database {
     return classes.Character(
       id: map[0]['id'],
       characterName: map[0]['characterName'],
-      iconPath: map[0]['iconPath'],
+      image: map[0]['image'],
       characterClass: c,
       characterLevel: map[0]['characterLevel'],
     );

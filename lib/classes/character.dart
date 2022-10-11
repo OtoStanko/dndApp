@@ -7,7 +7,7 @@ class Character extends models.Character {
       {required super.id,
       required super.characterName,
       required super.characterClass,
-      required super.iconPath,
+      super.image,
       required this.characterLevel});
 
   @override

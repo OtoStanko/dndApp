@@ -31,9 +31,13 @@ class _CharacterSheet extends State<CharacterSheet> {
           const Text("Class description", style: TextStyle(fontSize: 10)),
           Text(widget.character.characterClass.classDescription,
               style: const TextStyle(fontSize: 30)),
-          const Text("Icon Path", style: TextStyle(fontSize: 10)),
-          widget.character.iconPath.isNotEmpty
-              ? Image.asset(widget.character.iconPath.toString())
+          const Text("Icon", style: TextStyle(fontSize: 10)),
+          widget.character.image != null
+              ? Container(
+                  alignment: Alignment.center,
+                  child: Image.memory(widget.character.image!,
+                      height: 300, width: 300),
+                )
               : const Text("No path provided")
         ]));
   }

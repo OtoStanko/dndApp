@@ -16,8 +16,4 @@ const creatingCharacterSnackbar = "Creating your character, please wait...";
 // Helpers
 var defaultClass = Class(className: "", id: -1, classDescription: "");
 var emptyCharacter = Character(
-    id: -1,
-    characterName: "",
-    characterClass: defaultClass,
-    characterLevel: 0,
-    iconPath: "");
+    id: -1, characterName: "", characterClass: defaultClass, characterLevel: 0);

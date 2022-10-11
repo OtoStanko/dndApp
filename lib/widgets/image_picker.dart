@@ -17,7 +17,7 @@ class _ImagePickerState extends State<ImagePicker> {
   _init() async {
     // Pick an image
     final image = await picker.ImagePicker()
-        .pickImage(source: picker.ImageSource.gallery);
+        .pickImage(source: picker.ImageSource.gallery, imageQuality: 50);
     if (image == null) return;
 
     setState(() {

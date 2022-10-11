@@ -1,9 +1,15 @@
+import 'package:firstapp/db/models/class_model.dart';
 import 'package:flutter/material.dart';
 
 class Dropdown extends StatefulWidget {
   final Future<List<String>> classes;
+  final Class? initialValue;
   final Function onChanged;
-  const Dropdown({super.key, required this.classes, required this.onChanged});
+  const Dropdown(
+      {super.key,
+      required this.classes,
+      required this.onChanged,
+      this.initialValue});
 
   @override
   State<Dropdown> createState() => _DropdownState();
@@ -23,7 +29,9 @@ class _DropdownState extends State<Dropdown> {
   _initialise() async {
     await widget.classes.then((value) {
       setState(() {
-        dropdownValue = value.first;
+        dropdownValue = widget.initialValue != null
+            ? widget.initialValue!.className
+            : value.first;
         _classes = value;
         _loading = false;
       });

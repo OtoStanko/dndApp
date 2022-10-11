@@ -1,6 +1,5 @@
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
-import 'package:firstapp/extensions/string_extension.dart';
 import 'package:firstapp/screens/add_character.dart';
 import 'package:firstapp/screens/view_character.dart';
 import 'package:flutter/material.dart';
@@ -39,22 +38,27 @@ class _CharacterList extends State<CharacterList> {
       colors.shuffle();
       return Card(
         child: ListTile(
-            leading: CircleAvatar(
-              radius: 20,
-              backgroundColor: colors.first,
-              child: Text(e.characterName.substring(0, 2).toUpperCase()),
-            ),
+            leading: e.image != null
+                ? CircleAvatar(
+                    radius: 20,
+                    backgroundColor: colors.first,
+                    backgroundImage: MemoryImage(e.image!))
+                : CircleAvatar(
+                    radius: 20,
+                    backgroundColor: colors.first,
+                    child: Text(e.characterName.substring(0, 2).toUpperCase())),
             title: Text(
               e.characterName,
               style: const TextStyle(fontSize: 40),
               overflow: TextOverflow.ellipsis,
             ),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => ViewCharacter(characterId: e.id),
                   ));
+              _reloadCharacters();
             },
             trailing: Text(e.characterClass.className,
                 style: const TextStyle(color: Colors.black38))),
@@ -88,7 +92,7 @@ class _CharacterList extends State<CharacterList> {
             floatingActionButton: FloatingActionButton(
               backgroundColor: Colors.green,
               onPressed: () async {
-                final result = await Navigator.push(
+                await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const AddCharacter()));

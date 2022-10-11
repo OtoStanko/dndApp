@@ -104,7 +104,7 @@ class _AddCharacter extends State<AddCharacter> {
                           padding: const EdgeInsets.all(16.0),
                           child: ImagePicker(
                             onChanged: (File file) async {
-                              newCharacter.iconPath = file.path;
+                              newCharacter.image = file.readAsBytesSync();
                             },
                           )),
                       Padding(

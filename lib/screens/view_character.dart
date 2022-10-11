@@ -1,6 +1,7 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/db/database.dart';
+import 'package:firstapp/screens/view_character_screens/character_edit.dart';
 import 'package:firstapp/screens/view_character_screens/character_sheet.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +24,7 @@ class _ViewCharacter extends State<ViewCharacter> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: _currentIndex);
     // Load character info from database
     _init(widget.characterId).then((value) {
       setState(() {
@@ -73,17 +74,19 @@ class _ViewCharacter extends State<ViewCharacter> {
       Container(
         color: Colors.red,
       ),
-      Container(
-        color: Colors.green,
-      ),
+      CharacterEdit(character: _character)
     ];
 
     return Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.person),
-          title: Text(_character.characterName),
-          backgroundColor: const Color.fromARGB(255, 12, 127, 100),
-        ),
+            title: Text(_character.characterName),
+            backgroundColor: const Color.fromARGB(255, 12, 127, 100),
+            leading: _character.image != null
+                ? Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: CircleAvatar(
+                        backgroundImage: MemoryImage(_character.image!)))
+                : const Icon(Icons.person)),
         body: SizedBox.expand(
           child: PageView(
               controller: _pageController,
