@@ -5,6 +5,7 @@ import 'package:firstapp/classes/classes.dart';
 import 'package:firstapp/db/init/init_database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/db/models/class_model.dart';
+import 'package:firstapp/db/models/feature_model.dart';
 import 'package:firstapp/static/constants.dart';
 import 'package:firstapp/utils/utils.dart';
 import 'package:flutter/widgets.dart';
@@ -141,6 +142,55 @@ class Database {
       sqliteCharactersTableName,
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  Future<Feature> insertFeature(Feature feature) async {
+    final db = await database;
+
+    // Allow Auto-incrementing the ID
+    Map<String, dynamic> map = feature.toMap();
+    map.remove("id");
+
+    int id = await db.insert(
+      sqliteCharacterFeaturesTableName,
+      map,
+      conflictAlgorithm: sq.ConflictAlgorithm.replace,
+    );
+
+    feature.id = id;
+    return feature;
+  }
+
+  Future<List<Feature>> features(Character character) async {
+    final db = await database;
+
+    final selectString =
+        "SELECT $sqliteCharacterFeatureConnectionsTableName.id, featureName, featureDescription, featureMaxLevel, featureUsed FROM $sqliteCharacterFeatureConnectionsTableName INNER JOIN $sqliteCharacterFeaturesTableName ON $sqliteCharacterFeaturesTableName.id = $sqliteCharacterFeatureConnectionsTableName.featureId WHERE $sqliteCharacterFeatureConnectionsTableName.characterId = ${character.id};";
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(selectString);
+
+    var items = List.generate(maps.length, (i) {
+      return Feature(
+          id: maps[i]['id'],
+          featureName: maps[i]['featureName'],
+          featureDescription: maps[i]['featureDescription'],
+          featureMaxLevel: maps[i]['featureMaxLevel'],
+          featureUsed: maps[i]['featureUsed']);
+    });
+    return items;
+  }
+
+  Future<void> assignFeature(Feature feature, Character character) async {
+    final db = await database;
+
+    await db.insert(
+      sqliteCharacterFeatureConnectionsTableName,
+      {
+        "characterId": character.id,
+        "featureId": feature.id,
+      },
+      conflictAlgorithm: sq.ConflictAlgorithm.replace,
     );
   }
 }

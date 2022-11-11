@@ -1,8 +1,9 @@
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/screens/view_character_screens/character_edit.dart';
+import 'package:firstapp/screens/view_character_screens/character_features.dart';
 import 'package:firstapp/screens/view_character_screens/character_sheet.dart';
+import 'package:firstapp/widgets/overlapping_panels.dart';
 import 'package:flutter/material.dart';
 
 class ViewCharacter extends StatefulWidget {
@@ -58,25 +59,6 @@ class _ViewCharacter extends State<ViewCharacter> {
               )));
     }
 
-    // Bottom navigation items
-    var bottomButtons = <BottomNavyBarItem>[
-      BottomNavyBarItem(
-          title: const Text('Character'), icon: const Icon(Icons.person)),
-      BottomNavyBarItem(
-          title: const Text('Features'), icon: const Icon(Icons.apps)),
-      BottomNavyBarItem(
-          title: const Text('Edit'), icon: const Icon(Icons.edit)),
-    ];
-
-    // View screens
-    var viewScreens = <Widget>[
-      CharacterSheet(character: _character),
-      Container(
-        color: Colors.red,
-      ),
-      CharacterEdit(character: _character)
-    ];
-
     return Scaffold(
         appBar: AppBar(
             title: Text(_character.characterName),
@@ -87,7 +69,40 @@ class _ViewCharacter extends State<ViewCharacter> {
                     child: CircleAvatar(
                         backgroundImage: MemoryImage(_character.image!)))
                 : const Icon(Icons.person)),
-        body: SizedBox.expand(
+        body: Stack(
+          children: [
+            OverlappingPanels(
+              // Using the Builder widget is not required. You can pass your widget directly. But to use `OverlappingPanelsState.of(context)` you need to wrap your widget in a Builder
+              left: Builder(builder: (context) {
+                return CharacterSheet(character: _character);
+              }),
+              right: Builder(builder: (context) {
+                return CharacterEdit(character: _character);
+              }),
+              main: Builder(
+                builder: (context) {
+                  return CharacterFeatures(character: _character);
+                },
+              ),
+              onSideChange: (side) {
+                setState(() {
+                  if (side == RevealSide.main) {
+                    // hide something
+                  } else if (side == RevealSide.left) {
+                    // show something
+                  }
+                });
+              },
+            ),
+            
+          ],
+        ));
+  }
+}
+
+
+/*
+SizedBox.expand(
           child: PageView(
               controller: _pageController,
               scrollDirection: Axis.vertical,
@@ -105,5 +120,69 @@ class _ViewCharacter extends State<ViewCharacter> {
           },
           items: bottomButtons,
         ));
-  }
-}
+
+
+        Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 10),
+                offset: const Offset(0, 1),
+                child: SizedBox(
+                  height: 90,
+                  child: Material(
+                    color: Colors.blue,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Flex(
+                          direction: Axis.horizontal,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.public,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.person_pin,
+                                color: Colors.white54,
+                                size: 32,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.search,
+                                color: Colors.white54,
+                                size: 32,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.alternate_email,
+                                color: Colors.white54,
+                                size: 32,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: CircleAvatar(
+                                radius: 16,
+                                foregroundImage: NetworkImage(
+                                    "https://avatars.githubusercontent.com/u/5024388?v=4"),
+                              ),
+                            ),
+                          ]),
+                    ),
+                  ),
+                ),
+              ),
+            )
+*/

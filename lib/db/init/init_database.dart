@@ -7,6 +7,8 @@ import 'package:sqflite/sqlite_api.dart';
 var pairs = <dynamic, dynamic>{
   "charactersTable": sqliteCharactersTableName,
   "classesTable": sqliteCharacterClassTableName,
+  "featuresTable": sqliteCharacterFeaturesTableName,
+  "featureConnectionsTable": sqliteCharacterFeatureConnectionsTableName,
 };
 
 void initDatabase(Database database) async {

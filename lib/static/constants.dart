@@ -7,6 +7,8 @@ const double dividerWidth = 20;
 const sqliteDBName = "database";
 const sqliteCharactersTableName = "characters";
 const sqliteCharacterClassTableName = "classes";
+const sqliteCharacterFeaturesTableName = "features";
+const sqliteCharacterFeatureConnectionsTableName = "feature_connections";
 
 const levelInputError = "Input a level in range of 1 to 20";
 const nameInputError = "Please insert a valid name";
