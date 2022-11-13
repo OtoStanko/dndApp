@@ -1,6 +1,9 @@
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/screens/character_list.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:lottie/lottie.dart';
 
 class Init extends StatefulWidget {
   const Init({Key? key}) : super(key: key);
@@ -24,23 +27,28 @@ class _Init extends State<Init> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_loading) {
-      return const CharacterList();
-    }
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        CircularProgressIndicator(),
-        Padding(padding: EdgeInsets.all(10)),
-        Text(
-          "Loading",
-          style: TextStyle(
-              color: Colors.white,
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.w100,
-              fontSize: 16),
-        )
-      ],
-    );
+    return AnimatedSplashScreen(
+        splash: loadingScreen(),
+        splashIconSize: 250,
+        nextScreen: const CharacterList(),
+        disableNavigation: !_loading,
+        splashTransition: SplashTransition.fadeTransition,
+        pageTransitionType: PageTransitionType.rightToLeft);
   }
+}
+
+loadingScreen() {
+  return Column(
+    children: [
+      Lottie.asset('assets/skydive.json', height: 200),
+      const Text(
+        "Getting your critical rolls...",
+        style: TextStyle(
+            color: Colors.black,
+            decoration: TextDecoration.none,
+            fontWeight: FontWeight.w100,
+            fontSize: 16),
+      )
+    ],
+  );
 }

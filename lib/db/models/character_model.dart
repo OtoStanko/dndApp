@@ -1,5 +1,6 @@
+import 'dart:typed_data';
+
 import 'package:firstapp/db/models/class_model.dart';
-import 'package:flutter/services.dart';
 
 class Character {
   int id;
