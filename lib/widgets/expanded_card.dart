@@ -32,11 +32,11 @@ class ExpandedTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
-                  children: List.from(List.generate(1 /*feature.featureUsed*/,
-                          (index) => IconChecked(checked: true)))
-                      ..addAll(List.generate(
-                          feature.featureMaxLevel - 1,
-                          (index) => IconChecked(checked: false)))),
+                  children: List.from(List.generate(feature.featureUsed,
+                      (index) => IconChecked(checked: true)))
+                    ..addAll(List.generate(
+                        feature.featureMaxLevel - feature.featureUsed,
+                        (index) => IconChecked(checked: false)))),
             )
           ],
         ),

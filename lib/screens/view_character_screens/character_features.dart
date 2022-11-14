@@ -1,11 +1,8 @@
-import 'dart:ui';
-
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/feature_model.dart';
 import 'package:firstapp/widgets/expanded_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class CharacterFeatures extends StatefulWidget {
   final Character character;

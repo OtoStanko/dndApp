@@ -94,12 +94,10 @@ class _ViewCharacter extends State<ViewCharacter> {
                 });
               },
             ),
-            
           ],
         ));
   }
 }
-
 
 /*
 SizedBox.expand(
