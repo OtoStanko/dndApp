@@ -12,32 +12,61 @@ class CharacterList extends StatefulWidget {
 }
 
 class _CharacterList extends State<CharacterList> {
-  late List<Character> _characters;
-  bool _loaded = false;
+  late Future<List<Character>> _data;
 
-  Future<List<Character>> _init() async {
-    return await Database().characters();
-  }
-
-  _reloadCharacters() {
-    _init().then((value) {
-      setState(() {
-        _characters = value;
-        _loaded = true;
-      });
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _data = _init();
     });
   }
 
-  _CharacterList() {
-    _reloadCharacters();
+  Future<List<Character>> _init() async {
+    return Database().characters();
   }
 
-  List<Card> getCharacters() {
+  Widget formatString(String name) {
+    if (name.length == 1) {
+      return Text(name.toUpperCase());
+    } else {
+      return Text(name.substring(0, 2).toUpperCase());
+    }
+  }
+
+  List<Widget> getCharacters(List<Character> characters) {
     final colors = Colors.primaries.toList();
-    return _characters.map((e) {
+    return characters.map((e) {
       colors.shuffle();
       return Card(
         child: ListTile(
+            onLongPress: () {
+              showDialog(context: context, builder: ((context) {
+                return AlertDialog(
+                  title: const Text("Delete character?"),
+                  content: Text("Are you sure you want to delete ${e.characterName}?"),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  actions: [
+                    TextButton(
+                      onPressed: () async {
+                        await Database().deleteCharacter(e.id);
+                        setState(() {
+                          _data = _init();
+                        });
+                      },
+                      child: const Text("Yes"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("No"),
+                    )
+                  ],
+                );
+              }));
+            },
             leading: e.image != null
                 ? CircleAvatar(
                     radius: 20,
@@ -46,7 +75,7 @@ class _CharacterList extends State<CharacterList> {
                 : CircleAvatar(
                     radius: 20,
                     backgroundColor: colors.first,
-                    child: Text(e.characterName.substring(0, 2).toUpperCase())),
+                    child: formatString(e.characterName)),
             title: Text(
               e.characterName,
               style: const TextStyle(fontSize: 40),
@@ -58,48 +87,60 @@ class _CharacterList extends State<CharacterList> {
                   MaterialPageRoute(
                     builder: (_) => ViewCharacter(characterId: e.id),
                   ));
-              _reloadCharacters();
+              // _reloadCharacters();
             },
             trailing: Text(e.characterClass.className,
-                style: const TextStyle(color: Colors.black38))),
+                style: const TextStyle(
+                    color: Colors.black38, fontWeight: FontWeight.w100))),
       );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) {
-      return MaterialApp(
-          home: Scaffold(
-              appBar: AppBar(
-                backgroundColor: const Color.fromARGB(255, 4, 64, 6),
-                title: const Text("Characters"),
+    return FutureBuilder(
+        future: _data,
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          List<Character> list = snapshot.data as List<Character>;
+          return Column(
+            children: [
+              SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      children: getCharacters(list))),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const AddCharacter()));
+                          setState(() {
+                            setState(() {
+                              _data = _init();
+                            });
+                          });
+                        },
+                        child: const Text('Add new character')),
+                  )
+                ],
               ),
-              body: const Center(
-                child: CircularProgressIndicator(),
-              )));
-    }
-
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              backgroundColor: const Color.fromARGB(255, 4, 64, 6),
-              title: const Text("Characters"),
-            ),
-            body: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child: ListView(children: getCharacters())),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.green,
-              onPressed: () async {
-                await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddCharacter()));
-                // Reload character list
-                _reloadCharacters();
-              },
-              child: const Icon(Icons.add),
-            )));
+            ],
+          );
+        }));
   }
 }

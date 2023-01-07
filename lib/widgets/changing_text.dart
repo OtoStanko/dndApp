@@ -23,23 +23,18 @@ class _ChangingTextState extends State<ChangingText> {
     "Loading (but magical)...",
   ];
   int id = 0;
-  // Timer? timer;
+  Timer? timer;
 
   @override
   void initState() {
-    setState(() {
-      id = Random().nextInt(helpers.length);
-      // Don't know why this does not update the text
-      // timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      //   id = Random(id).nextInt(helpers.length);
-      // });
-    });
     super.initState();
+    timer = Timer.periodic(const Duration(seconds: 3),
+        (Timer t) => setState(() => id = Random().nextInt(helpers.length)));
   }
 
   @override
   void dispose() {
-    // timer?.cancel();
+    timer?.cancel();
     super.dispose();
   }
 

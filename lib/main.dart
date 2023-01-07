@@ -1,4 +1,3 @@
-//import 'dart:html';
 import 'package:firstapp/screens/init.dart';
 import 'package:flutter/material.dart';
 
