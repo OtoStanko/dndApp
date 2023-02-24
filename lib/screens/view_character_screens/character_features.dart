@@ -4,6 +4,8 @@ import 'package:firstapp/db/models/feature_model.dart';
 import 'package:firstapp/widgets/expanded_card.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/feature_body.dart';
+
 class CharacterFeatures extends StatefulWidget {
   final Character character;
   const CharacterFeatures({Key? key, required this.character})
@@ -13,8 +15,7 @@ class CharacterFeatures extends StatefulWidget {
 }
 
 class _CharacterFeaturesState extends State<CharacterFeatures> {
-  late List<Feature> _features;
-  bool _loaded = false;
+  late Future<List<Feature>> featuresFuture;
   final db = Database();
 
   Future<List<Feature>> _init() async {
@@ -24,43 +25,38 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
   @override
   void initState() {
     super.initState();
-    _reloadCharacters();
-  }
-
-  _reloadCharacters() {
-    _init().then((value) {
-      setState(() {
-        _features = value;
-        _loaded = true;
-      });
+    setState(() {
+      featuresFuture = _init();
     });
   }
 
-  List<ExpandedTile> getFeatures() {
-    return _features.map((feature) => ExpandedTile(feature: feature)).toList();
+  List<ExpandedTile> getFeatures(List<Feature> features) {
+    return features
+        .map((feature) => ExpandedTile(
+            feature: feature,
+            onTap: () {
+              print("Selected item");
+            },
+            onDelete: (feature) {
+              db.unassignFeature(feature, widget.character);
+              setState(() {
+                featuresFuture = _init();
+              });
+            }))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final features = getFeatures();
-
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        child: Container(
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      spreadRadius: 5)
-                ]),
-            child: ListView(children: [
+    return FutureBuilder(
+        future: featuresFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          var data = snapshot.data as List<Feature>;
+          return Column(
+            children: [
               const Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
@@ -68,24 +64,73 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
-              ...features,
-              Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 1)
-                      ]),
-                  margin: const EdgeInsets.all(15),
-                  child: const Text("Add feature",
-                      style: TextStyle(fontSize: 30),
-                      textAlign: TextAlign.center))
-            ]
-                //(features.isEmpty ? [const Text('No features')] : features)
+              if (data.isEmpty)
+                const Text("No features found")
+              else
+                ...getFeatures(data),
+              addButton()
+            ],
+          );
+        });
+  }
 
-                )));
+  // Add button-> open dialog and show list of features from database
+  Widget addButton() {
+    return ElevatedButton(
+        onPressed: () {
+          // open dialog with one button
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Add Feature"),
+                    content: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: FutureBuilder(
+                            future: db.getAllFeatures(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+                              var data = snapshot.data as List<Feature>;
+                              return ListView.builder(
+                                  itemCount: data.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        FeatureBody(
+                                            feature: data[index],
+                                            onTap: (current, max) {
+                                              Feature feature = data[index]
+                                                  .copyWith(
+                                                      featureMaxLevel: max,
+                                                      featureUsed: current);
+                                              // Add feature to character
+                                              db.assignFeature(
+                                                  feature, widget.character);
+                                              // Update list
+                                              setState(() {
+                                                featuresFuture = _init();
+                                              });
+                                              // Close dialog
+                                              Navigator.pop(context);
+                                            }),
+                                        const Divider()
+                                      ],
+                                    );
+                                  });
+                            })),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel"))
+                    ]);
+              });
+        },
+        child: const Text("Add Feature"));
   }
 }

@@ -1,47 +1,81 @@
+import 'package:awesome_select/awesome_select.dart';
+import 'package:expandable/expandable.dart';
 import 'package:firstapp/db/models/feature_model.dart';
-import 'package:firstapp/widgets/icon_check.dart';
 import 'package:flutter/material.dart';
 
 class ExpandedTile extends StatelessWidget {
   final Feature feature;
+  final Function(Feature) onDelete;
+  final Function() onTap;
 
-  const ExpandedTile({super.key, required this.feature});
+  const ExpandedTile(
+      {super.key,
+      required this.feature,
+      required this.onTap,
+      required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(15.0))),
-      elevation: 2,
-      margin: const EdgeInsets.only(left: 12.0, right: 12.0, top: 5, bottom: 5),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ExpansionTile(
-          backgroundColor: Colors.white,
-          title: _buildTitle(),
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: <Widget>[
-                  Text(feature.featureDescription),
-                  const Spacer()
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: GestureDetector(
+            onLongPress: () {
+              // Delete feature dialog
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text("Delete ${feature.featureName}?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Cancel")),
+                        TextButton(
+                            onPressed: () {
+                              onDelete(feature);
+                              Navigator.pop(context);
+                            },
+                            child: Text("Delete"))
+                      ],
+                    );
+                  });
+            },
+            child: ExpandablePanel(
+              header: _buildTitle(),
+              collapsed: Container(),
+              expanded: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text(feature.featureDescription),
+                        const Spacer()
+                      ],
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SmartSelect.multiple(
+                        title: "Feature Level",
+                        choiceItems: generateUsedFeatures(),
+                        choiceType: S2ChoiceType.chips,
+                        modalType: S2ModalType.popupDialog,
+                        onChange: (value) {
+                          print(value);
+                        },
+                      )),
                 ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Wrap(
-                  children: List.from(List.generate(feature.featureUsed,
-                      (index) => IconChecked(checked: true)))
-                    ..addAll(List.generate(
-                        feature.featureMaxLevel - feature.featureUsed,
-                        (index) => IconChecked(checked: false)))),
-            )
-          ],
-        ),
-      ),
-    );
+            )));
+  }
+
+  List<S2Choice> generateUsedFeatures() {
+    return List.generate(feature.featureUsed, (index) => S2Choice(value: index, title: 'TRUE'))
+      ..addAll(List.generate(
+          feature.featureMaxLevel - feature.featureUsed, (index) => S2Choice(value: feature.featureUsed + index, title: 'FALSE')));
   }
 
   Widget _buildTitle() {
@@ -50,7 +84,9 @@ class ExpandedTile extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Text(feature.featureName, style: const TextStyle(fontSize: 30)),
+            Text(feature.featureName,
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w100)),
             const Spacer(),
             Text("${feature.featureUsed}/${feature.featureMaxLevel}"),
           ],

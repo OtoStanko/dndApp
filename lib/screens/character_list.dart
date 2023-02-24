@@ -1,3 +1,6 @@
+import 'package:cached_memory_image/cached_image_base64_manager.dart';
+import 'package:cached_memory_image/cached_image_manager.dart';
+import 'package:cached_memory_image/provider/cached_memory_image_provider.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/screens/add_character.dart';
@@ -13,6 +16,8 @@ class CharacterList extends StatefulWidget {
 
 class _CharacterList extends State<CharacterList> {
   late Future<List<Character>> _data;
+  final CachedImageManager _cachedImageManager =
+      CachedImageBase64Manager.instance();
 
   @override
   void initState() {
@@ -23,7 +28,8 @@ class _CharacterList extends State<CharacterList> {
   }
 
   Future<List<Character>> _init() async {
-    return Database().characters();
+    var data = Database().characters();
+    return data;
   }
 
   Widget formatString(String name) {
@@ -36,48 +42,54 @@ class _CharacterList extends State<CharacterList> {
 
   List<Widget> getCharacters(List<Character> characters) {
     final colors = Colors.primaries.toList();
-    return characters.map((e) {
+    return characters.map((character) {
       colors.shuffle();
       return Card(
         child: ListTile(
             onLongPress: () {
-              showDialog(context: context, builder: ((context) {
-                return AlertDialog(
-                  title: const Text("Delete character?"),
-                  content: Text("Are you sure you want to delete ${e.characterName}?"),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  actions: [
-                    TextButton(
-                      onPressed: () async {
-                        await Database().deleteCharacter(e.id);
-                        setState(() {
-                          _data = _init();
-                        });
-                      },
-                      child: const Text("Yes"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("No"),
-                    )
-                  ],
-                );
-              }));
+              showDialog(
+                  context: context,
+                  builder: ((context) {
+                    return AlertDialog(
+                      title: const Text("Delete character?"),
+                      content: Text(
+                          "Are you sure you want to delete ${character.characterName}?"),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      actions: [
+                        TextButton(
+                          onPressed: () async {
+                            await Database().deleteCharacter(character.id);
+                            setState(() {
+                              _data = _init();
+                            });
+                          },
+                          child: const Text("Yes"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("No"),
+                        )
+                      ],
+                    );
+                  }));
             },
-            leading: e.image != null
+            leading: character.image != null
                 ? CircleAvatar(
                     radius: 20,
                     backgroundColor: colors.first,
-                    backgroundImage: MemoryImage(e.image!))
+                    backgroundImage: CachedMemoryImageProvider(
+                        scale: 0.1,
+                        "app://characters/${character.id}",
+                        bytes: character.image))
                 : CircleAvatar(
                     radius: 20,
                     backgroundColor: colors.first,
-                    child: formatString(e.characterName)),
+                    child: formatString(character.characterName)),
             title: Text(
-              e.characterName,
+              character.characterName,
               style: const TextStyle(fontSize: 40),
               overflow: TextOverflow.ellipsis,
             ),
@@ -85,11 +97,11 @@ class _CharacterList extends State<CharacterList> {
               await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ViewCharacter(characterId: e.id),
+                    builder: (_) => ViewCharacter(characterId: character.id),
                   ));
               // _reloadCharacters();
             },
-            trailing: Text(e.characterClass.className,
+            trailing: Text(character.characterClass.className,
                 style: const TextStyle(
                     color: Colors.black38, fontWeight: FontWeight.w100))),
       );

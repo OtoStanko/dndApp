@@ -2,8 +2,8 @@ class Feature {
   int id;
   final String featureName;
   final String featureDescription;
-  final int featureMaxLevel;
-  final int featureUsed;
+  late final int featureMaxLevel;
+  late final int featureUsed;
 
   Feature({
     required this.id,
@@ -21,6 +21,22 @@ class Feature {
       'featureMaxLevel': featureMaxLevel,
       'featureUsed': featureUsed,
     };
+  }
+
+  Feature copyWith({
+    int? id,
+    String? featureName,
+    String? featureDescription,
+    int? featureMaxLevel,
+    int? featureUsed,
+  }) {
+    return Feature(
+      id: id ?? this.id,
+      featureName: featureName ?? this.featureName,
+      featureDescription: featureDescription ?? this.featureDescription,
+      featureMaxLevel: featureMaxLevel ?? this.featureMaxLevel,
+      featureUsed: featureUsed ?? this.featureUsed,
+    );
   }
 
   @override

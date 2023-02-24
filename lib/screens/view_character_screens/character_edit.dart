@@ -32,7 +32,6 @@ class _CharacterEdit extends State<CharacterEdit> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.only(left: 50),
         child: Padding(
             padding: const EdgeInsets.all(10),
             child: SingleChildScrollView(
@@ -41,10 +40,23 @@ class _CharacterEdit extends State<CharacterEdit> {
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text("Character name",
-                              style: TextStyle(fontSize: 10)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Edit character",
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w100)),
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(Icons.close))
+                            ],
+                          ),
                           Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16.0),
                               child: TextFormField(
                                 initialValue: editCharacter.characterName,
                                 onChanged: (val) {
@@ -63,10 +75,9 @@ class _CharacterEdit extends State<CharacterEdit> {
                                   labelText: 'Name',
                                 ),
                               )),
-                          const Text("Character class",
-                              style: TextStyle(fontSize: 10)),
                           Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16.0),
                               child: Dropdown(
                                   classes: _classes.getClassesNames(),
                                   initialValue: editCharacter.characterClass,
@@ -74,10 +85,9 @@ class _CharacterEdit extends State<CharacterEdit> {
                                     editCharacter.characterClass =
                                         await _classes.getClass(value);
                                   })),
-                          const Text("Character level",
-                              style: TextStyle(fontSize: 10)),
                           Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16.0),
                               child: TextFormField(
                                 initialValue:
                                     editCharacter.characterLevel.toString(),
@@ -113,18 +123,21 @@ class _CharacterEdit extends State<CharacterEdit> {
                               style: TextStyle(fontSize: 10)),
                           Padding(
                               padding: const EdgeInsets.all(16.0),
-                              child: Row(children: [
-                                widget.character.image != null
-                                    ? Image.memory(widget.character.image!,
-                                        height: 50, width: 50)
-                                    : const Text("No image"),
-                                ImagePicker(
-                                  onChanged: (File file) async {
-                                    editCharacter.image =
-                                        file.readAsBytesSync();
-                                  },
-                                ),
-                              ])),
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    widget.character.image != null
+                                        ? Image.memory(widget.character.image!,
+                                            height: 50, width: 50)
+                                        : const Text("No image"),
+                                    ImagePicker(
+                                      onChanged: (File file) async {
+                                        editCharacter.image =
+                                            file.readAsBytesSync();
+                                      },
+                                    ),
+                                  ])),
                           Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: ElevatedButton(

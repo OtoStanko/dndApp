@@ -189,8 +189,39 @@ class Database {
       {
         "characterId": character.id,
         "featureId": feature.id,
+        "featureMaxLevel": feature.featureMaxLevel,
+        "featureUsed": feature.featureUsed,
       },
       conflictAlgorithm: sq.ConflictAlgorithm.replace,
     );
+  }
+
+  Future<void> unassignFeature(Feature feature, Character character) async {
+    final db = await database;
+
+    await db.delete(
+      sqliteCharacterFeatureConnectionsTableName,
+      where: 'id = ?',
+      whereArgs: [feature.id],
+    );
+  }
+
+  Future<List<Feature>> getAllFeatures() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+        sqliteCharacterFeaturesTableName,
+        columns: ["id", "featureName", "featureDescription"]);
+
+    var items = List.generate(maps.length, (i) {
+      return Feature(
+          id: maps[i]['id'],
+          featureName: maps[i]['featureName'],
+          featureDescription: maps[i]['featureDescription'],
+          featureMaxLevel: -1, // Should be set by the user
+          featureUsed: -1 // Should be set by the user
+          );
+    });
+    return items;
   }
 }
