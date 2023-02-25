@@ -39,6 +39,17 @@ class Feature {
     );
   }
 
+  factory Feature.fromMap(Map<String, dynamic> map) {
+    print("Feature.fromMap: $map");
+    return Feature(
+      id: map['id'],
+      featureName: map['featureName'],
+      featureDescription: map['featureDescription'],
+      featureMaxLevel: map['featureMaxLevel'],
+      featureUsed: map['featureUsed'],
+    );
+  }
+
   @override
   String toString() {
     return 'Feature{id: $id, featureName: $featureName, featureDescription: $featureDescription, featureMaxLevel: $featureMaxLevel, featureUsed: $featureUsed}';

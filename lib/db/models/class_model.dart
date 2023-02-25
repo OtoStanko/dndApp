@@ -17,6 +17,26 @@ class Class {
     };
   }
 
+  Class copyWith({
+    int? id,
+    String? className,
+    String? classDescription,
+  }) {
+    return Class(
+      id: id ?? this.id,
+      className: className ?? this.className,
+      classDescription: classDescription ?? this.classDescription,
+    );
+  }
+
+  factory Class.fromMap(Map<String, dynamic> map) {
+    return Class(
+      id: map['id'],
+      className: map['className'],
+      classDescription: map['classDescription'],
+    );
+  }
+
   @override
   String toString() {
     return 'Character{id: $id, className: $className, classDescription: $classDescription}';

@@ -1,9 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.firstapp">
+    package="com.example.dndapp">
    <application
-        android:label="firstapp"
+        android:label="DnD App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Required to fetch data from the internet. -->
+        <uses-permission android:name="android.permission.INTERNET" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

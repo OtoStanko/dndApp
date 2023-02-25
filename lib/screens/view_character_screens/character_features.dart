@@ -34,8 +34,13 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
     return features
         .map((feature) => ExpandedTile(
             feature: feature,
-            onTap: () {
-              print("Selected item");
+            onFeatureUpdate: (value) {
+              setState(() {
+                // Update feature used
+                Feature updated = feature.copyWith(featureUsed: value.length);
+                // Update database
+                db.updateFeatureForCharacter(updated, widget.character);
+              });
             },
             onDelete: (feature) {
               db.unassignFeature(feature, widget.character);
@@ -68,14 +73,14 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
                 const Text("No features found")
               else
                 ...getFeatures(data),
-              addButton()
+              addButton(data)
             ],
           );
         });
   }
 
   // Add button-> open dialog and show list of features from database
-  Widget addButton() {
+  Widget addButton(List<Feature> featuresAssigned) {
     return ElevatedButton(
         onPressed: () {
           // open dialog with one button
@@ -95,6 +100,18 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
                                     child: CircularProgressIndicator());
                               }
                               var data = snapshot.data as List<Feature>;
+                              // Filter out features that are already assigned based on name and description (id is used from connections table)
+                              data = data
+                                  .where((element) => !featuresAssigned.any(
+                                      (feature) =>
+                                          feature.featureName ==
+                                              element.featureName &&
+                                          feature.featureDescription ==
+                                              element.featureDescription))
+                                  .toList();
+                              if (data.isEmpty) {
+                                return const Text("No features found");
+                              }
                               return ListView.builder(
                                   itemCount: data.length,
                                   itemBuilder: (context, index) {

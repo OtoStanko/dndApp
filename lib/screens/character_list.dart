@@ -6,6 +6,7 @@ import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/screens/add_character.dart';
 import 'package:firstapp/screens/view_character.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_speed_dial/simple_speed_dial.dart';
 
 class CharacterList extends StatefulWidget {
   const CharacterList({super.key});
@@ -16,8 +17,6 @@ class CharacterList extends StatefulWidget {
 
 class _CharacterList extends State<CharacterList> {
   late Future<List<Character>> _data;
-  final CachedImageManager _cachedImageManager =
-      CachedImageBase64Manager.instance();
 
   @override
   void initState() {
@@ -62,6 +61,7 @@ class _CharacterList extends State<CharacterList> {
                             await Database().deleteCharacter(character.id);
                             setState(() {
                               _data = _init();
+                              Navigator.pop(context);
                             });
                           },
                           child: const Text("Yes"),
@@ -82,7 +82,7 @@ class _CharacterList extends State<CharacterList> {
                     backgroundColor: colors.first,
                     backgroundImage: CachedMemoryImageProvider(
                         scale: 0.1,
-                        "app://characters/${character.id}",
+                        "app://characters/${character.id}/${character.image.hashCode}",
                         bytes: character.image))
                 : CircleAvatar(
                     radius: 20,
@@ -148,7 +148,7 @@ class _CharacterList extends State<CharacterList> {
                           });
                         },
                         child: const Text('Add new character')),
-                  )
+                  ),
                 ],
               ),
             ],

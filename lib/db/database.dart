@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firstapp/classes/character.dart' as classes;
 import 'package:firstapp/classes/classes.dart';
@@ -7,8 +8,8 @@ import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/db/models/class_model.dart';
 import 'package:firstapp/db/models/feature_model.dart';
 import 'package:firstapp/static/constants.dart';
-import 'package:firstapp/utils/utils.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart' as sq;
 
@@ -86,6 +87,10 @@ class Database {
           characterClass: c);
     });
     return items;
+  }
+
+  Future<List<Class>> getAllClasses() async {
+    return await characterClasses();
   }
 
   Future<List<Class>> characterClasses() async {
@@ -223,5 +228,90 @@ class Database {
           );
     });
     return items;
+  }
+
+  Future<void> updateFeatureForCharacter(
+      Feature feature, Character character) async {
+    final db = await database;
+
+    await db.update(
+      sqliteCharacterFeatureConnectionsTableName,
+      {
+        "featureMaxLevel": feature.featureMaxLevel,
+        "featureUsed": feature.featureUsed,
+      },
+      where: 'id = ? AND characterId = ?',
+      whereArgs: [feature.id, character.id],
+    );
+  }
+
+  Future<void> deleteFeature(Feature feature) async {
+    final db = await database;
+
+    await db.delete(
+      sqliteCharacterFeaturesTableName,
+      where: 'id = ?',
+      whereArgs: [feature.id],
+    );
+  }
+
+  // API stuff
+  Future<void> updateFeatureTable() async {
+    // Get data from API
+    final response =
+        await http.get(Uri.parse('https://www.dnd5eapi.co/api/features'));
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      var data = Feature.fromMap(jsonDecode(response.body));
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load feature');
+    }
+
+    final db = await database;
+  }
+
+  Future<void> updateClassTable() async {
+    // Get data from API
+    final response =
+        await http.get(Uri.parse('https://www.dnd5eapi.co/api/classes'));
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      var data = jsonDecode(response.body);
+      var count = data['count'];
+      var unparsedClasses = data['results'];
+
+      for (var i = 0; i < count; i++) {
+        final response = await http.get(Uri.parse("https://www.dnd5eapi.co/api/classes/${unparsedClasses[i]['url']}"));
+        if (response.statusCode == 200) {
+          // If the server did return a 200 OK response,
+          // then parse the JSON.
+          var data = jsonDecode(response.body);
+          var name = data['name'];
+          var desc = data['desc'];
+          var hitDie = data['hit_die'];
+          var proficiencies = data['proficiencies'];
+          var savingThrows = data['saving_throws'];
+          var startingEquipment = data['starting_equipment'];
+          var classLevels = data['class_levels'];
+          var subclasses = data['subclasses'];
+          var spellcasting = data['spellcasting'];
+          var url = data['url'];
+        } else {
+          // If the server did not return a 200 OK response,
+          // then throw an exception.
+          throw Exception('Failed to load class');
+        }
+      }
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load class');
+    }
+
+    final db = await database;
   }
 }
