@@ -2,6 +2,7 @@ import 'package:firstapp/db/database.dart';
 import 'package:firstapp/screens/welcome_screen.dart';
 import 'package:firstapp/widgets/changing_text.dart';
 import 'package:firstapp/widgets/floating_menu.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +26,9 @@ class _Init extends State<Init> {
     //await _prefs.setString('name', 'Oto');
     await _prefs.setString('version', '0.0.1');
 
-    await Future.delayed(const Duration(seconds: 3));
+    if (!kDebugMode) {
+      await Future.delayed(const Duration(seconds: 3));
+    }
   }
 
   @override
@@ -46,13 +49,19 @@ class _Init extends State<Init> {
             return Text(snapshot.error.toString());
           }
           return Scaffold(
-              floatingActionButton: FloatingMenu(preferences: _prefs, onPreferencesUpdate: () {
-                setState(() {
-                  // Reload app
-                  futureInit = _init();
-                });
-              }),
-              body: const SafeArea(child: WelcomeScreen()));
+              floatingActionButton: FloatingMenu(
+                  preferences: _prefs,
+                  onPreferencesUpdate: () {
+                    setState(() {
+                      // Reload app
+                      futureInit = _init();
+                    });
+                  }),
+              body: SafeArea(
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child:  const WelcomeScreen())));
         });
   }
 }

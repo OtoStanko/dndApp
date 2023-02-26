@@ -45,7 +45,9 @@ class _DropdownState extends State<Dropdown> {
     }
     return Row(
       children: [
-        const Expanded(child: Text("Character class", style: TextStyle(fontWeight: FontWeight.w100))),
+        const Expanded(
+            child: Text("Character class",
+                style: TextStyle(fontWeight: FontWeight.w100))),
         DropdownButton<String>(
           value: dropdownValue,
           icon: const Icon(Icons.arrow_drop_down),

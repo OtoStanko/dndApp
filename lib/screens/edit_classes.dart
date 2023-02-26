@@ -14,6 +14,7 @@ class EditClasses extends StatefulWidget {
 class _EditClassesState extends State<EditClasses> {
   // Database
   late Future<Database> futureDB;
+  bool _loading = false;
 
   @override
   initState() {
@@ -64,19 +65,84 @@ class _EditClassesState extends State<EditClasses> {
                                       fontSize: 40,
                                       fontWeight: FontWeight.w100)),
                             ])),
+                    if (_loading) const Center(child:CircularProgressIndicator.adaptive()) else
                     _buildFeatureList(db),
-                    _loadFromAPI(db)
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [_removeAllClasses(db), _loadFromAPI(db)])
                   ],
                 )),
           ));
         });
   }
 
+  Widget _removeAllClasses(Database db) {
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        onPressed: () async {
+          //Show confirmation dialog
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Remove all classes"),
+                    content: const Text(
+                        "Are you sure you want to remove all classes? This will remove all classes that are not assigned to any characters."),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            Navigator.pop(context);
+                            await db.deleteAllClasses();
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text("Remove all classes"))
+                    ]);
+              });
+        },
+        child: const Text("Remove all classes"));
+  }
+
   Widget _loadFromAPI(Database db) {
     return ElevatedButton(
         onPressed: () async {
-          await db.updateClassTable();
-          setState(() {});
+          // Show confirmation dialog
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Load from API"),
+                    content: const Text(
+                        "Are you sure you want to load classes from API? This will remove all existing classes."),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            Navigator.pop(context);
+                            await db.updateClassTable();
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text("Load from API"))
+                    ]);
+              });
         },
         child: const Text("Load from API"));
   }
@@ -92,13 +158,20 @@ class _EditClassesState extends State<EditClasses> {
             return Text(snapshot.error.toString());
           }
           List<Class> classes = snapshot.data as List<Class>;
+
+          if (classes.isEmpty) {
+            return const Center(child: Text("No classes found :("));
+          }
+
           return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7,
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: classes.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                        title: Text(classes[index].className),
+                        title: Text(
+                            "${classes[index].className} D${classes[index].classHitDie}"),
                         trailing: IconButton(
                             onPressed: () {
                               //db.deleteFeature(features[index].id);
@@ -107,9 +180,9 @@ class _EditClassesState extends State<EditClasses> {
                                   context: context,
                                   builder: (context) {
                                     return AlertDialog(
-                                        title: const Text("Delete feature"),
-                                        content: const Text(
-                                            "Are you sure you want to delete this feature?"),
+                                        title: const Text("Delete class"),
+                                        content: Text(
+                                            "Are you sure you want to delete ${classes[index].className} class?"),
                                         actions: [
                                           TextButton(
                                               onPressed: () {

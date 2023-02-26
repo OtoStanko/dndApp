@@ -23,16 +23,14 @@ class WelcomeScreen extends StatelessWidget {
           }
           return Column(
             children: [
-              Flexible(
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: Text('Welcome back, ${snapshot.data.toString()}!',
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  child: Text('Welcome back, ${snapshot.data.toString()}!',
                           style: const TextStyle(
-                              fontSize:40, fontWeight: FontWeight.w100)))),
+                              fontSize: 40, fontWeight: FontWeight.w100))),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5),
                   child: CharacterList()),
-              
             ],
           );
         });

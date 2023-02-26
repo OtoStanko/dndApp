@@ -16,6 +16,6 @@ const nameInputError = "Please insert a valid name";
 const creatingCharacterSnackbar = "Creating your character, please wait...";
 
 // Helpers
-var defaultClass = Class(className: "", id: -1, classDescription: "");
+var defaultClass = Class(className: "", id: -1, classDescription: "", classHitDie: 0);
 var emptyCharacter = Character(
     id: -1, characterName: "", characterClass: defaultClass, characterLevel: 0);

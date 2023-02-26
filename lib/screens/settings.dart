@@ -77,6 +77,9 @@ class _SettingsState extends State<Settings> {
                                 if (value == null || value.isEmpty) {
                                   return "Please enter your name";
                                 }
+                                if (value.length > 15) {
+                                  return "Name must be less than 15 characters";
+                                }
                                 return null;
                               },
                             ),

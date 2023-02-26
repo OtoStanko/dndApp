@@ -1,12 +1,9 @@
-import 'package:cached_memory_image/cached_image_base64_manager.dart';
-import 'package:cached_memory_image/cached_image_manager.dart';
 import 'package:cached_memory_image/provider/cached_memory_image_provider.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/character_model.dart';
 import 'package:firstapp/screens/add_character.dart';
 import 'package:firstapp/screens/view_character.dart';
 import 'package:flutter/material.dart';
-import 'package:simple_speed_dial/simple_speed_dial.dart';
 
 class CharacterList extends StatefulWidget {
   const CharacterList({super.key});
@@ -98,7 +95,9 @@ class _CharacterList extends State<CharacterList> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => ViewCharacter(characterId: character.id),
-                  ));
+                  )).then((value) => setState(() {
+                    _data = _init();
+                  }));
               // _reloadCharacters();
             },
             trailing: Text(character.characterClass.className,
@@ -125,11 +124,9 @@ class _CharacterList extends State<CharacterList> {
           return Column(
             children: [
               SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.7,
+                  height: MediaQuery.of(context).size.height * 0.63,
                   child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: getCharacters(list))),
+                      shrinkWrap: true, children: getCharacters(list))),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [

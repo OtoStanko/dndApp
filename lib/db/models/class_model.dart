@@ -1,44 +1,43 @@
 class Class {
   int id;
   final String className;
-  final String classDescription;
+  String classDescription;
+  final int classHitDie;
 
-  Class({
-    required this.id,
-    required this.className,
-    required this.classDescription,
-  });
+  Class(
+      {required this.id,
+      required this.className,
+      this.classDescription = '',
+      required this.classHitDie});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'className': className,
       'classDescription': classDescription,
+      'classHitDie': classHitDie
     };
   }
 
-  Class copyWith({
-    int? id,
-    String? className,
-    String? classDescription,
-  }) {
+  Class copyWith(
+      {int? id, String? className, String? classDescription, int? classHitDie}) {
     return Class(
-      id: id ?? this.id,
-      className: className ?? this.className,
-      classDescription: classDescription ?? this.classDescription,
-    );
+        id: id ?? this.id,
+        className: className ?? this.className,
+        classDescription: classDescription ?? this.classDescription,
+        classHitDie: classHitDie ?? this.classHitDie);
   }
 
   factory Class.fromMap(Map<String, dynamic> map) {
     return Class(
-      id: map['id'],
-      className: map['className'],
-      classDescription: map['classDescription'],
-    );
+        id: map['id'],
+        className: map['className'],
+        classDescription: map['classDescription'],
+        classHitDie: map['classHitDie']);
   }
 
   @override
   String toString() {
-    return 'Character{id: $id, className: $className, classDescription: $classDescription}';
+    return 'Class{id: $id, className: $className, classDescription: $classDescription, classHitDie: $classHitDie}';
   }
 }

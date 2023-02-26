@@ -21,7 +21,8 @@ class Classes {
 
   Future<List<String>> getClassesNames() async {
     var classes = await _loadClasses();
-    return classes.values.map((e) => e.className).toList();
+    var c = classes.values.map((e) => e.className).toList();
+    return [...c, "Default"];
   }
 
   getClass(toFind) async {

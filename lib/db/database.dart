@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firstapp/api/api_connector.dart';
 import 'package:firstapp/classes/character.dart' as classes;
 import 'package:firstapp/classes/classes.dart';
 import 'package:firstapp/db/init/init_database.dart';
@@ -79,7 +80,11 @@ class Database {
 
     var items = List.generate(maps.length, (i) {
       var c = classes[maps[i]['characterClass']] ??
-          Class(id: -1, className: "Default", classDescription: "Default");
+          Class(
+              id: -1,
+              className: "Default",
+              classDescription: "Default",
+              classHitDie: 0);
       return Character(
           id: maps[i]['id'],
           characterName: maps[i]['characterName'],
@@ -87,6 +92,40 @@ class Database {
           characterClass: c);
     });
     return items;
+  }
+
+  Future<bool> checkIfClassIsUsed(Class c) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+        sqliteCharactersTableName,
+        columns: ["id", "image", "characterName", "characterClass"],
+        where: "characterClass = ?",
+        whereArgs: [c.id]);
+
+    return maps.isNotEmpty;
+  }
+
+  Future<void> deleteAllClasses() async {
+    final db = await database;
+    // Remove all classes that ar not in the characterfeatures table
+    await db.delete(sqliteCharacterClassTableName,
+        where:
+            "id NOT IN (SELECT classId FROM $sqliteCharacterFeaturesTableName)");
+  }
+
+  Future<Class> getClassById(int id) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+        sqliteCharacterClassTableName,
+        columns: ["id", "className", "classDescription", "classHitDie"],
+        where: "id = ?",
+        whereArgs: [id]);
+    return Class(
+        id: maps[0]['id'],
+        className: maps[0]['className'],
+        classDescription: maps[0]['classDescription'],
+        classHitDie: maps[0]['classHitDie']);
   }
 
   Future<List<Class>> getAllClasses() async {
@@ -98,16 +137,30 @@ class Database {
 
     final List<Map<String, dynamic>> maps = await db.query(
         sqliteCharacterClassTableName,
-        columns: ["id", "className", "classDescription"]);
+        columns: ["id", "className", "classDescription", "classHitDie"]);
 
     var items = List.generate(maps.length, (i) {
       return Class(
-        id: maps[i]['id'],
-        className: maps[i]['className'],
-        classDescription: maps[i]['classDescription'],
-      );
+          id: maps[i]['id'],
+          className: maps[i]['className'],
+          classDescription: maps[i]['classDescription'],
+          classHitDie: maps[i]['classHitDie']);
     });
     return items;
+  }
+
+  Future<void> insertClass(Class characterClass) async {
+    final db = await database;
+
+    // Allow Auto-incrementing the ID
+    Map<String, dynamic> map = characterClass.toMap();
+    map.remove("id");
+
+    await db.insert(
+      sqliteCharacterClassTableName,
+      map,
+      conflictAlgorithm: sq.ConflictAlgorithm.replace,
+    );
   }
 
   Future<classes.Character> getCharacter(int id) async {
@@ -118,7 +171,11 @@ class Database {
         .query(sqliteCharactersTableName, where: 'id = ?', whereArgs: [id]);
 
     var c = cl[map[0]['characterClass']] ??
-        Class(id: -1, className: "Default", classDescription: "Default");
+        Class(
+            id: -1,
+            className: "Default",
+            classDescription: "Default",
+            classHitDie: 0);
 
     return classes.Character(
       id: map[0]['id'],
@@ -154,7 +211,13 @@ class Database {
     final db = await database;
 
     // Allow Auto-incrementing the ID
-    Map<String, dynamic> map = feature.toMap();
+    Map<String, dynamic> map = {
+      "featureName": feature.featureName,
+      "featureDescription": feature.featureDescription,
+      "featureType": 'feature',
+      "featureLevelAcquire": feature.featureLevelAcquire,
+      "featurePrimaryClass": feature.featurePrimaryClass,
+    };
     map.remove("id");
 
     int id = await db.insert(
@@ -167,11 +230,15 @@ class Database {
     return feature;
   }
 
+  Future<List<Feature>> getFeaturesForCharacter(Character character) async {
+    return await features(character);
+  }
+
   Future<List<Feature>> features(Character character) async {
     final db = await database;
 
     final selectString =
-        "SELECT $sqliteCharacterFeatureConnectionsTableName.id, featureName, featureDescription, featureMaxLevel, featureUsed FROM $sqliteCharacterFeatureConnectionsTableName INNER JOIN $sqliteCharacterFeaturesTableName ON $sqliteCharacterFeaturesTableName.id = $sqliteCharacterFeatureConnectionsTableName.featureId WHERE $sqliteCharacterFeatureConnectionsTableName.characterId = ${character.id};";
+        "SELECT $sqliteCharacterFeatureConnectionsTableName.id, featureName, featureDescription, featureLevelAcquire, featurePrimaryClass, featureMaxLevel, featureUsed FROM $sqliteCharacterFeatureConnectionsTableName INNER JOIN $sqliteCharacterFeaturesTableName ON $sqliteCharacterFeaturesTableName.id = $sqliteCharacterFeatureConnectionsTableName.featureId WHERE $sqliteCharacterFeatureConnectionsTableName.characterId = ${character.id};";
 
     final List<Map<String, dynamic>> maps = await db.rawQuery(selectString);
 
@@ -180,6 +247,8 @@ class Database {
           id: maps[i]['id'],
           featureName: maps[i]['featureName'],
           featureDescription: maps[i]['featureDescription'],
+          featureLevelAcquire: maps[i]['featureLevelAcquire'],
+          featurePrimaryClass: maps[i]['featurePrimaryClass'],
           featureMaxLevel: maps[i]['featureMaxLevel'],
           featureUsed: maps[i]['featureUsed']);
     });
@@ -214,15 +283,22 @@ class Database {
   Future<List<Feature>> getAllFeatures() async {
     final db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query(
-        sqliteCharacterFeaturesTableName,
-        columns: ["id", "featureName", "featureDescription"]);
+    final List<Map<String, dynamic>> maps =
+        await db.query(sqliteCharacterFeaturesTableName, columns: [
+      "id",
+      "featureName",
+      "featureDescription",
+      "featureLevelAcquire",
+      "featurePrimaryClass"
+    ]);
 
     var items = List.generate(maps.length, (i) {
       return Feature(
           id: maps[i]['id'],
           featureName: maps[i]['featureName'],
           featureDescription: maps[i]['featureDescription'],
+          featureLevelAcquire: maps[i]['featureLevelAcquire'],
+          featurePrimaryClass: maps[i]['featurePrimaryClass'],
           featureMaxLevel: -1, // Should be set by the user
           featureUsed: -1 // Should be set by the user
           );
@@ -245,7 +321,7 @@ class Database {
     );
   }
 
-  Future<void> deleteFeature(Feature feature) async {
+  Future<void> deleteFeatureFromCharacter(Feature feature) async {
     final db = await database;
 
     await db.delete(
@@ -255,63 +331,54 @@ class Database {
     );
   }
 
+  Future<void> createCustomFeature(Feature feature) async {
+    final db = await database;
+
+    await db.insert(
+      sqliteCharacterFeaturesTableName,
+      {
+        "featureName": feature.featureName,
+        "featureDescription": feature.featureDescription,
+        "featureLevelAcquire": feature.featureLevelAcquire,
+        "featurePrimaryClass": feature.featurePrimaryClass,
+      },
+      conflictAlgorithm: sq.ConflictAlgorithm.replace,
+    );
+  } 
+
   // API stuff
   Future<void> updateFeatureTable() async {
     // Get data from API
-    final response =
-        await http.get(Uri.parse('https://www.dnd5eapi.co/api/features'));
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      var data = Feature.fromMap(jsonDecode(response.body));
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load feature');
-    }
+    final api = ApiConnector();
+    final features = await api.getFeatures();
+    // Remove all features from database
+    await deleteAllFeatures();
 
-    final db = await database;
+    // Insert into database
+    for (var f in features) {
+      await insertFeature(f);
+    }
   }
 
   Future<void> updateClassTable() async {
     // Get data from API
-    final response =
-        await http.get(Uri.parse('https://www.dnd5eapi.co/api/classes'));
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      var data = jsonDecode(response.body);
-      var count = data['count'];
-      var unparsedClasses = data['results'];
+    final api = ApiConnector();
+    final classes = await api.getClasses();
 
-      for (var i = 0; i < count; i++) {
-        final response = await http.get(Uri.parse("https://www.dnd5eapi.co/api/classes/${unparsedClasses[i]['url']}"));
-        if (response.statusCode == 200) {
-          // If the server did return a 200 OK response,
-          // then parse the JSON.
-          var data = jsonDecode(response.body);
-          var name = data['name'];
-          var desc = data['desc'];
-          var hitDie = data['hit_die'];
-          var proficiencies = data['proficiencies'];
-          var savingThrows = data['saving_throws'];
-          var startingEquipment = data['starting_equipment'];
-          var classLevels = data['class_levels'];
-          var subclasses = data['subclasses'];
-          var spellcasting = data['spellcasting'];
-          var url = data['url'];
-        } else {
-          // If the server did not return a 200 OK response,
-          // then throw an exception.
-          throw Exception('Failed to load class');
-        }
-      }
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load class');
+    // Remove all classes from database
+    await deleteAllClasses();
+
+    // Insert into database
+    for (var c in classes) {
+      await insertClass(c);
     }
+  }
 
+  Future<void> deleteAllFeatures() async {
     final db = await database;
+    // Remove all features that ar not in the characterfeatures table
+    await db.delete(sqliteCharacterFeaturesTableName,
+        where:
+            "id NOT IN (SELECT featureId FROM $sqliteCharacterFeatureConnectionsTableName)");
   }
 }

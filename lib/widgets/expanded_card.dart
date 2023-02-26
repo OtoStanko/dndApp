@@ -25,7 +25,6 @@ class _ExpandedTile extends State<ExpandedTile> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     selected = List.generate(widget.feature.featureUsed, (index) => index);
     featureUsed = widget.feature.featureUsed;
@@ -69,8 +68,7 @@ class _ExpandedTile extends State<ExpandedTile> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: <Widget>[
-                        Text(widget.feature.featureDescription),
-                        const Spacer()
+                        Flexible(child: Text(widget.feature.featureDescription))
                       ],
                     ),
                   ),

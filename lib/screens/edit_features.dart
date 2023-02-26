@@ -1,6 +1,11 @@
+import 'package:expandable/expandable.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/feature_model.dart';
 import 'package:flutter/material.dart';
+import 'package:numberpicker/numberpicker.dart';
+
+
+import '../db/models/class_model.dart';
 
 class EditFeatures extends StatefulWidget {
   const EditFeatures({super.key});
@@ -12,6 +17,7 @@ class EditFeatures extends StatefulWidget {
 class _EditFeaturesState extends State<EditFeatures> {
   // Database
   late Future<Database> futureDB;
+  bool _loading = false;
 
   @override
   initState() {
@@ -62,23 +68,161 @@ class _EditFeaturesState extends State<EditFeatures> {
                                       fontSize: 40,
                                       fontWeight: FontWeight.w100)),
                             ])),
-                    _buildFeatureList(db),
-                    _loadFromAPI(db)
+                    if (_loading)
+                      const Center(child: CircularProgressIndicator.adaptive())
+                    else
+                      _buildFeatureList(db),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _removeAllClasses(db),
+                          _loadFromAPI(db),
+                          //_addCustomFeature(db)
+                        ])
                   ],
                 )),
           ));
         });
   }
 
+  Widget _removeAllClasses(Database db) {
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        onPressed: () async {
+          //Show confirmation dialog
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Remove all features"),
+                    content: const Text(
+                        "Are you sure you want to remove all features? This will remove all features that are not assigned to any characters."),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            Navigator.pop(context);
+                            await db.deleteAllFeatures();
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text("Remove all features"))
+                    ]);
+              });
+        },
+        child: const Text("Remove all features"));
+  }
+
   Widget _loadFromAPI(Database db) {
     return ElevatedButton(
         onPressed: () async {
-          await db.updateFeatureTable();
-          setState(() {});
+          // Show confirmation dialog
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Load from API"),
+                    content: const Text(
+                        "Are you sure you want to load features from API? This will remove all existing features."),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            Navigator.pop(context);
+                            await db.updateFeatureTable();
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text("Load from API"))
+                    ]);
+              });
         },
         child: const Text("Load from API"));
   }
 
+  Widget _addCustomFeature(Database db) {
+    Feature newFeature = Feature(
+      id: -1,
+      featurePrimaryClass: -1,
+      featureMaxLevel: -1,
+      featureUsed: -1,
+      featureName: "New Feature",
+      featureDescription: "New Feature Description",
+      featureLevelAcquire: 1,
+    );
+
+    return ElevatedButton(
+        onPressed: () async {
+          // Show confirmation dialog
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                    title: const Text("Add custom feature"),
+                    content: Form(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                          const Text("Enter the name of the feature"),
+                          TextField(onChanged: (value) {
+                            setState(() {
+                              newFeature =
+                                  newFeature.copyWith(featureName: value);
+                            });
+                          }),
+                          const Text("Enter the description of the feature"),
+                          TextField(onChanged: (value) {
+                            setState(() {
+                              newFeature = newFeature.copyWith(
+                                  featureDescription: value);
+                            });
+                          }),
+                          const Text("Enter Level Acquired"),
+                           NumberPicker(
+                            value: newFeature.featureLevelAcquire,
+                            minValue: 1,
+                            maxValue: 20,
+                            onChanged: (value) => setState(() => newFeature = newFeature.copyWith(featureLevelAcquire: value.toInt()))),
+                        ])),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel")),
+                      TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                            });
+                            Navigator.pop(context);
+                            await db.createCustomFeature(newFeature);
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: const Text("Add custom feature"))
+                    ]);
+              });
+        },
+        child: const Text("Add custom feature"));
+  }
 
   Widget _buildFeatureList(Database db) {
     return FutureBuilder(
@@ -92,40 +236,79 @@ class _EditFeaturesState extends State<EditFeatures> {
           }
           List<Feature> features = snapshot.data as List<Feature>;
           return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: features.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                        title: Text(features[index].featureName),
-                        trailing: IconButton(
-                            onPressed: () {
-                              //db.deleteFeature(features[index].id);
-                              // Show confirmation dialog
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                        title: const Text("Delete feature"),
-                                        content: const Text(
-                                            "Are you sure you want to delete this feature?"),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text("Cancel")),
-                                          TextButton(
-                                              onPressed: () {
-                                                db.deleteFeature(features[index]);
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text("Delete"))
-                                        ]);
-                                  });
-                            },
-                            icon: const Icon(Icons.delete)));
+                    return GestureDetector(
+                        onLongPress: () async {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                    title: const Text("Delete feature"),
+                                    content: Text(
+                                        "Are you sure you want to delete '${features[index].featureName}'?"),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("Cancel")),
+                                      TextButton(
+                                          onPressed: () async {
+                                            setState(() {
+                                              _loading = true;
+                                            });
+                                            Navigator.pop(context);
+                                            await db.deleteFeatureFromCharacter(
+                                                features[index]);
+                                            setState(() {
+                                              _loading = false;
+                                            });
+                                          },
+                                          child: const Text("Delete"))
+                                    ]);
+                              });
+                        },
+                        child: ExpandablePanel(
+                          header: Text(features[index].featureName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                              )),
+                          collapsed: Container(),
+                          expanded: Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Container(
+                                  child: Column(children: [
+                                Text(features[index].featureDescription),
+                                Text(
+                                    "Level acquired: ${features[index].featureLevelAcquire}"),
+                                FutureBuilder(
+                                    future: _getClassName(
+                                        features[index].featurePrimaryClass,
+                                        db),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const CircularProgressIndicator
+                                            .adaptive();
+                                      }
+                                      //print(snapshot.data);
+                                      return Text(
+                                          "PrimaryClass: ${snapshot.data}");
+                                    })
+                              ]))) /*  */,
+                        ));
                   }));
         });
+  }
+
+  // Get class name from class id
+  Future<String> _getClassName(int classId, Database db) async {
+    Class classObj = await db.getClassById(classId);
+    print(classObj.className);
+    return classObj.className;
   }
 }
