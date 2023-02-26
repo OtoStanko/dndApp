@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 
-import '../db/models/class_model.dart';
+import '../../db/models/class_model.dart';
 
 class EditFeatures extends StatefulWidget {
   const EditFeatures({super.key});

@@ -22,19 +22,30 @@ class _Init extends State<Init> {
   Future<void> _init() async {
     await db.initDB();
     _prefs = await SharedPreferences.getInstance();
-    await _prefs.setBool('firstRun', false);
-    //await _prefs.setString('name', 'Oto');
+    await _prefs.setBool('firstRun', true);
     await _prefs.setString('version', '0.0.1');
 
     if (!kDebugMode) {
       await Future.delayed(const Duration(seconds: 3));
-    }
+    } 
   }
 
   @override
   void initState() {
     super.initState();
     futureInit = _init();
+    futureInit.then((value) => {
+          // Check if first_run is false, if not show intro screen
+          if (_prefs.getBool('firstRun') ?? false)
+            {
+              // Start intro screen as soon as possible
+              Navigator.pushNamed(context, '/intro-screen').then((value) => 
+                // Set first_run to false
+                _prefs.setBool('firstRun', false))
+                // Refresh screen
+                .then((value) => setState(() {}))
+            }
+        });
   }
 
   @override
@@ -61,7 +72,7 @@ class _Init extends State<Init> {
                   child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
-                      child:  const WelcomeScreen())));
+                      child: const WelcomeScreen())));
         });
   }
 }

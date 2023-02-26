@@ -43,6 +43,7 @@ class _DropdownState extends State<Dropdown> {
     if (_loading) {
       return const CircularProgressIndicator();
     }
+    print("Dropdown value: $dropdownValue");
     return Row(
       children: [
         const Expanded(

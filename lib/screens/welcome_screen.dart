@@ -26,8 +26,8 @@ class WelcomeScreen extends StatelessWidget {
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Text('Welcome back, ${snapshot.data.toString()}!',
-                          style: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w100))),
+                      style: const TextStyle(
+                          fontSize: 40, fontWeight: FontWeight.w100))),
               const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5),
                   child: CharacterList()),

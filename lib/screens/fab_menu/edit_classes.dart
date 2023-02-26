@@ -1,8 +1,7 @@
 import 'package:firstapp/db/models/class_model.dart';
 import 'package:flutter/material.dart';
 
-import '../db/database.dart';
-import '../db/models/feature_model.dart';
+import '../../db/database.dart';
 
 class EditClasses extends StatefulWidget {
   const EditClasses({super.key});
