@@ -34,7 +34,11 @@ class _FeatureBodyState extends State<FeatureBody> {
                   value: currentlyUsed,
                   minValue: 0,
                   maxValue: maxUses,
-                  onChanged: (value) => setState(() => currentlyUsed = value),
+                  onChanged: (value) {
+                    setState(() {
+                      currentlyUsed = value;
+                    });
+                  },
                 ),
                 Text("Currently : $currentlyUsed/$maxUses"),
               ]),
@@ -43,7 +47,10 @@ class _FeatureBodyState extends State<FeatureBody> {
                   value: maxUses,
                   minValue: 1,
                   maxValue: 20,
-                  onChanged: (value) => setState(() => maxUses = value),
+                  onChanged: (value) => setState(() {
+                    maxUses = value;
+                    if (currentlyUsed > maxUses) currentlyUsed = maxUses;
+                  }),
                 ),
                 Text("Max Uses: $maxUses"),
               ]),

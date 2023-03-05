@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class Preferences {
+  String name;
+  String version = '1.0.0';
+
+  Preferences({required this.name, required this.version});
+}
+
+
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -9,13 +17,13 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-
-  Future<String> getName(SharedPreferences preferences) async {
-    final name = preferences.getString('name') ?? "ERR";
-    return name;
+  Future<Preferences> getPreferences(SharedPreferences preferences) async {
+    final name = preferences.getString('name') ?? "";
+    final version = preferences.getString('version') ?? "-1";
+    return Preferences(name: name, version: version);
   }
 
-  Future<void> saveName(SharedPreferences preferences, String name) async {;
+  Future<void> saveName(SharedPreferences preferences, String name) async {
     await preferences.setString('name', name);
     // close keyboard
     FocusScope.of(context).unfocus();
@@ -27,18 +35,20 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-   final arguments = (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
-   final preferences = arguments['preferences'];
+    final arguments = (ModalRoute.of(context)?.settings.arguments ??
+        <String, dynamic>{}) as Map;
+    final preferences = arguments['preferences'];
     return FutureBuilder(
-        future: getName(preferences),
+        future: getPreferences(preferences),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator.adaptive();
           }
-          if (snapshot.hasError) {
+          if (snapshot.hasError || snapshot.data == null) {
             return Text(snapshot.error.toString());
           }
-          String name = snapshot.data as String;
+          Preferences loadedPreferences = snapshot.data as Preferences;
+
           return Scaffold(
               body: SafeArea(
                   child: Padding(
@@ -69,9 +79,9 @@ class _SettingsState extends State<Settings> {
                           children: [
                             const Text("Introductory name"),
                             TextFormField(
-                              initialValue: name,
+                              initialValue: loadedPreferences.name,
                               onChanged: (value) {
-                                name = value;
+                                loadedPreferences.name = value;
                               },
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -85,11 +95,31 @@ class _SettingsState extends State<Settings> {
                             ),
                             ElevatedButton(
                                 onPressed: () {
-                                  saveName(preferences, name);
+                                  saveName(preferences, loadedPreferences.name);
                                 },
                                 child: const Text("Save"))
                           ],
-                        ))
+                        )),
+                        // Credits section
+                        Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: const [
+                                Text("Credits",
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w100))
+                              ],
+                            )),
+                        Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            // Created by: Matej Hakoš, Oto Stanko
+                            child: Column(children: [
+                              Text("Version: ${loadedPreferences.version}"),
+                              const Text("Created by: Matej Hakoš, Oto Stanko"),
+                              const Text("2023"),
+                            ])),
                       ]))));
         });
   }

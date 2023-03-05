@@ -1,5 +1,7 @@
 import 'package:firstapp/db/models/class_model.dart';
+import 'package:firstapp/widgets/add_class_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 import '../../db/database.dart';
 
@@ -64,15 +66,34 @@ class _EditClassesState extends State<EditClasses> {
                                       fontSize: 40,
                                       fontWeight: FontWeight.w100)),
                             ])),
-                    if (_loading) const Center(child:CircularProgressIndicator.adaptive()) else
-                    _buildFeatureList(db),
-                    Row(
+                    if (_loading)
+                      const Center(child: CircularProgressIndicator.adaptive())
+                    else
+                      _buildFeatureList(db),
+                    Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [_removeAllClasses(db), _loadFromAPI(db)])
+                        children: [
+                          _removeAllClasses(db),
+                          _addClass(db),
+                          _loadFromAPI(db)
+                        ])
                   ],
                 )),
           ));
         });
+  }
+
+  Widget _addClass(Database db) {
+    return AddClassModal(onSuccessfulSubmit: (Class newClass) async {
+      setState(() {
+        _loading = true;
+      });
+      Navigator.pop(context);
+      await db.insertClass(newClass);
+      setState(() {
+        _loading = false;
+      });
+    });
   }
 
   Widget _removeAllClasses(Database db) {

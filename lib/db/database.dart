@@ -339,6 +339,7 @@ class Database {
       {
         "featureName": feature.featureName,
         "featureDescription": feature.featureDescription,
+        "featureType": "user-created",
         "featureLevelAcquire": feature.featureLevelAcquire,
         "featurePrimaryClass": feature.featurePrimaryClass,
       },

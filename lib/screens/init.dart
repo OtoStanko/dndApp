@@ -43,7 +43,12 @@ class _Init extends State<Init> {
                 // Set first_run to false
                 _prefs.setBool('firstRun', false))
                 // Refresh screen
-                .then((value) => setState(() {}))
+                .then((value) => setState(() {
+                      // Reload app
+                      futureInit = _init();
+                      // Set first_run to false
+                      _prefs.setBool('firstRun', false);
+                }))
             }
         });
   }

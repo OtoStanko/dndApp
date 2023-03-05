@@ -75,11 +75,18 @@ class _IntroScreenState extends State<IntroScreen> {
       onDone: () async {
         // CLose keyboard
         FocusScope.of(context).unfocus();
+
+        if (name.isEmpty) {
+          return;
+        }
+
         // Save name to shared preferences
         final preferences = await SharedPreferences.getInstance();
         await preferences.setString('name', name).then((value) => {
-              // Navigate to home screen
-              Navigator.pop(context)
+              // Set first_run to false
+              preferences.setBool('first_run', false).then((value) =>
+                  // Navigate to home screen
+                  Navigator.pop(context))
             });
       },
       next: const Icon(Icons.arrow_forward),

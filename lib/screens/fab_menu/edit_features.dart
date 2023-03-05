@@ -308,7 +308,6 @@ class _EditFeaturesState extends State<EditFeatures> {
   // Get class name from class id
   Future<String> _getClassName(int classId, Database db) async {
     Class classObj = await db.getClassById(classId);
-    print(classObj.className);
     return classObj.className;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:firstapp/classes/character.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/feature_model.dart';
+import 'package:firstapp/widgets/add_feature_modal.dart';
 import 'package:firstapp/widgets/expanded_card.dart';
 import 'package:flutter/material.dart';
 
@@ -91,6 +92,7 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
                     title: const Text("Add Feature"),
                     content: SizedBox(
                         width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height * 0.5,
                         child: FutureBuilder(
                             future: db.getAllFeatures(),
                             builder: (context, snapshot) {
@@ -140,6 +142,8 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
                                   });
                             })),
                     actions: [
+                      // Add custom feature
+                      _addCustomFeature(db),
                       TextButton(
                           onPressed: () {
                             Navigator.pop(context);
@@ -149,5 +153,19 @@ class _CharacterFeaturesState extends State<CharacterFeatures> {
               });
         },
         child: const Text("Add Feature"));
+  }
+
+  Widget _addCustomFeature(Database db) {
+    print("Add custom feature");
+    return AddFeatureModal(
+      onSuccessfulSubmit: (Feature newFeature) async {
+        // Update list
+        setState(() {
+          db.createCustomFeature(newFeature).then((value) =>
+              // Update list
+              featuresFuture = _init());
+        });
+      },
+    );
   }
 }
