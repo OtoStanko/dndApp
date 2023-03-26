@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:expandable/expandable.dart';
 import 'package:firstapp/db/database.dart';
 import 'package:firstapp/db/models/feature_model.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../db/models/class_model.dart';
 
@@ -46,8 +49,7 @@ class _EditFeaturesState extends State<EditFeatures> {
           Database db = snapshot.data as Database;
 
           return Scaffold(
-              body: SafeArea(
-            child: Padding(
+            body: Padding(
                 padding: const EdgeInsets.all(8),
                 child: ListView(
                   shrinkWrap: true,
@@ -72,16 +74,16 @@ class _EditFeaturesState extends State<EditFeatures> {
                       const Center(child: CircularProgressIndicator.adaptive())
                     else
                       _buildFeatureList(db),
-                    Row(
+                    Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _removeAllClasses(db),
-                          _loadFromAPI(db),
-                          //_addCustomFeature(db)
+                          //_loadFromAPI(db),
+                          _loadFeaturesFromJSON(db)
                         ])
                   ],
                 )),
-          ));
+          );
         });
   }
 
@@ -156,17 +158,7 @@ class _EditFeaturesState extends State<EditFeatures> {
         child: const Text("Load from API"));
   }
 
-  Widget _addCustomFeature(Database db) {
-    Feature newFeature = Feature(
-      id: -1,
-      featurePrimaryClass: -1,
-      featureMaxLevel: -1,
-      featureUsed: -1,
-      featureName: "New Feature",
-      featureDescription: "New Feature Description",
-      featureLevelAcquire: 1,
-    );
-
+  Widget _loadFeaturesFromJSON(Database db) {
     return ElevatedButton(
         onPressed: () async {
           // Show confirmation dialog
@@ -174,32 +166,9 @@ class _EditFeaturesState extends State<EditFeatures> {
               context: context,
               builder: (context) {
                 return AlertDialog(
-                    title: const Text("Add custom feature"),
-                    content: Form(
-                        child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                          const Text("Enter the name of the feature"),
-                          TextField(onChanged: (value) {
-                            setState(() {
-                              newFeature =
-                                  newFeature.copyWith(featureName: value);
-                            });
-                          }),
-                          const Text("Enter the description of the feature"),
-                          TextField(onChanged: (value) {
-                            setState(() {
-                              newFeature = newFeature.copyWith(
-                                  featureDescription: value);
-                            });
-                          }),
-                          const Text("Enter Level Acquired"),
-                           NumberPicker(
-                            value: newFeature.featureLevelAcquire,
-                            minValue: 1,
-                            maxValue: 20,
-                            onChanged: (value) => setState(() => newFeature = newFeature.copyWith(featureLevelAcquire: value.toInt()))),
-                        ])),
+                    title: const Text("Load from JSON"),
+                    content: const Text(
+                        "Are you sure you want to load features from JSON? This will append features from JSON to the existing features."),
                     actions: [
                       TextButton(
                           onPressed: () {
@@ -212,16 +181,57 @@ class _EditFeaturesState extends State<EditFeatures> {
                               _loading = true;
                             });
                             Navigator.pop(context);
-                            await db.createCustomFeature(newFeature);
+
+                            // Check permissions for reading from Downloads folder
+                            if (await Permission.storage.request().isDenied ||
+                                await Permission.storage
+                                    .request()
+                                    .isPermanentlyDenied) {
+                              setState(() {
+                                _loading = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "Permission to read from Downloads folder denied")));
+                              return;
+                            }
+
+                            // Load features.json from Downloads folder
+                            Directory downloadsDirectory =
+                                Directory("/storage/emulated/0/Download");
+                            List<FileSystemEntity> files =
+                                downloadsDirectory.listSync();
+                            File? file;
+                            for (FileSystemEntity f in files) {
+                                    if (f.path.endsWith("features.json")) {
+                                      file = f as File;
+                                      break;
+                                    }
+                            }
+
+                            if (file == null || !file.existsSync()) {
+                              setState(() {
+                                _loading = false;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "features.json not found in Downloads folder")));
+                              return;
+                            }
+
+                            String featureFileText = file.readAsStringSync();
+                            await db.featureAppend(featureFileText);
                             setState(() {
                               _loading = false;
                             });
                           },
-                          child: const Text("Add custom feature"))
+                          child: const Text("Load from JSON"))
                     ]);
               });
         },
-        child: const Text("Add custom feature"));
+        child: const Text("Load from JSON"));
   }
 
   Widget _buildFeatureList(Database db) {
@@ -236,7 +246,7 @@ class _EditFeaturesState extends State<EditFeatures> {
           }
           List<Feature> features = snapshot.data as List<Feature>;
           return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
+              height: MediaQuery.of(context).size.height * 0.7,
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: features.length,
@@ -262,8 +272,27 @@ class _EditFeaturesState extends State<EditFeatures> {
                                               _loading = true;
                                             });
                                             Navigator.pop(context);
-                                            await db.deleteFeatureFromCharacter(
-                                                features[index]);
+                                            await db
+                                                .deleteFeature(features[index])
+                                                .then((value) => {
+                                                      // Show confirmation notifications
+                                                      if (value)
+                                                        {
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(SnackBar(
+                                                                  content: Text(
+                                                                      "Feature '${features[index].featureName}' deleted successfully")))
+                                                        }
+                                                      else
+                                                        {
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(SnackBar(
+                                                                  content: Text(
+                                                                      "Feature '${features[index].featureName}' could not be deleted. This feature is assigned to one or more characters.")))
+                                                        }
+                                                    });
                                             setState(() {
                                               _loading = false;
                                             });
@@ -280,26 +309,12 @@ class _EditFeaturesState extends State<EditFeatures> {
                           collapsed: Container(),
                           expanded: Padding(
                               padding: const EdgeInsets.only(bottom: 10),
-                              child: Container(
+                              child: Center(
                                   child: Column(children: [
                                 Text(features[index].featureDescription),
                                 Text(
                                     "Level acquired: ${features[index].featureLevelAcquire}"),
-                                FutureBuilder(
-                                    future: _getClassName(
-                                        features[index].featurePrimaryClass,
-                                        db),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const CircularProgressIndicator
-                                            .adaptive();
-                                      }
-                                      //print(snapshot.data);
-                                      return Text(
-                                          "PrimaryClass: ${snapshot.data}");
-                                    })
-                              ]))) /*  */,
+                              ]))),
                         ));
                   }));
         });

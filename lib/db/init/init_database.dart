@@ -1,4 +1,5 @@
 import 'package:firstapp/static/constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -12,7 +13,13 @@ var pairs = <dynamic, dynamic>{
 };
 
 void initDatabase(Database database) async {
-  var f = await rootBundle.loadString('lib/db/init/init.sql');
+  String f;
+  if (kDebugMode) {
+    f = await rootBundle.loadString('lib/db/init/init.sql');
+  }else {
+    f = await rootBundle.loadString('lib/db/init/init-release.sql');
+  }
+
   var strings = f.split(";").map((e) => e.trim());
 
   for (var inputString in strings) {

@@ -5,6 +5,7 @@ import 'package:firstapp/widgets/floating_menu.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Init extends StatefulWidget {
@@ -28,6 +29,9 @@ class _Init extends State<Init> {
     if (!kDebugMode) {
       await Future.delayed(const Duration(seconds: 3));
     } 
+
+    // Init permissions
+    await Permission.storage.request();
   }
 
   @override

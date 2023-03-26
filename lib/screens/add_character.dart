@@ -35,9 +35,8 @@ class _AddCharacter extends State<AddCharacter> {
   }
 
   _initCharacter() async {
-    Class c = await _classes.getClassById(1);
     setState(() {
-      newCharacter.characterClass = c;
+      newCharacter.characterClass = _classes.getDefaultClass();
       newCharacter.image = null;
     });
   }

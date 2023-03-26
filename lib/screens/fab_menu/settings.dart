@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../widgets/dump_data_to_JSON.dart';
+import '../../widgets/load_data_from_JSON.dart';
+
 class Preferences {
   String name;
   String version = '1.0.0';
@@ -101,6 +104,8 @@ class _SettingsState extends State<Settings> {
                           ],
                         )),
                         // Credits section
+                        LoadDataFromJSON(),
+                        DumpDataToJSON(),
                         Padding(
                             padding: const EdgeInsets.only(top: 20),
                             child: Row(

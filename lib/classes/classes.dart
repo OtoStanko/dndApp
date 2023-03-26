@@ -25,6 +25,10 @@ class Classes {
     return [...c, "Default"];
   }
 
+  Class getDefaultClass() {
+    return Class(id: -1, className: "Default", classHitDie: -1);
+  }
+
   getClass(toFind) async {
     var classes = await _loadClasses();
     return classes.values.firstWhere((element) => element.className == toFind);

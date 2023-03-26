@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:firstapp/api/api_connector.dart';
 import 'package:firstapp/classes/character.dart' as classes;
@@ -105,12 +106,24 @@ class Database {
     return maps.isNotEmpty;
   }
 
+  Future<bool> deleteClass(Class c) async {
+    final db = await database;
+
+    // Remove class only if it is not used by a character
+    int numOfChangedLines = await db.delete(sqliteCharacterClassTableName,
+        where:
+            "id = ? AND id NOT IN (SELECT characterClass FROM $sqliteCharactersTableName)",
+        whereArgs: [c.id]);
+
+    return numOfChangedLines > 0;
+  }
+
   Future<void> deleteAllClasses() async {
     final db = await database;
     // Remove all classes that ar not in the characterfeatures table
     await db.delete(sqliteCharacterClassTableName,
         where:
-            "id NOT IN (SELECT classId FROM $sqliteCharacterFeaturesTableName)");
+            "id NOT IN (SELECT characterId FROM $sqliteCharacterFeatureConnectionsTableName)");
   }
 
   Future<Class> getClassById(int id) async {
@@ -345,7 +358,7 @@ class Database {
       },
       conflictAlgorithm: sq.ConflictAlgorithm.replace,
     );
-  } 
+  }
 
   // API stuff
   Future<void> updateFeatureTable() async {
@@ -381,5 +394,171 @@ class Database {
     await db.delete(sqliteCharacterFeaturesTableName,
         where:
             "id NOT IN (SELECT featureId FROM $sqliteCharacterFeatureConnectionsTableName)");
+  }
+
+  Future<bool> deleteFeature(Feature feature) async {
+    final db = await database;
+
+    // Remove feature from feature table only if it is not in the characterfeatures table
+    int changed = await db.delete(sqliteCharacterFeaturesTableName,
+        where:
+            "id = ? AND id NOT IN (SELECT featureId FROM $sqliteCharacterFeatureConnectionsTableName)",
+        whereArgs: [feature.id]);
+
+    return changed > 0;
+  }
+
+  Future<Map<String, List<dynamic>>> dumpDatabase() async {
+    final db = await database;
+
+    // Get all classes
+    final List<Map<String, dynamic>> classMaps = await db.query(
+        sqliteCharacterClassTableName,
+        columns: ["className", "classDescription", "classHitDie"]);
+
+    // Get all features
+    final List<Map<String, dynamic>> featureMaps =
+        await db.query(sqliteCharacterFeaturesTableName, columns: [
+      "featureName",
+      "featureDescription",
+      'featureType',
+      "featureLevelAcquire",
+      "featurePrimaryClass"
+    ]);
+
+    // Get all characters
+    final List<Map<String, dynamic>> characterMaps =
+        await db.query(sqliteCharactersTableName, columns: [
+      "characterName",
+      "characterClass",
+      "characterLevel",
+      "image",
+    ]);
+
+    // Get all feature connections
+    final List<Map<String, dynamic>> featureConnectionMaps = await db
+        .query(sqliteCharacterFeatureConnectionsTableName, columns: [
+      "characterId",
+      "featureId",
+      "featureMaxLevel",
+      "featureUsed"
+    ]);
+
+    return {
+      "classes": classMaps,
+      "features": featureMaps,
+      "characters": characterMaps,
+      "featureConnections": featureConnectionMaps,
+    };
+  }
+
+  Future<String> dumpDatabaseToJSON() async {
+    final db = await database;
+
+    // Get data
+    final data = await dumpDatabase();
+
+    // Convert to JSON
+    final json = jsonEncode(data);
+    return json;
+  }
+
+  Future<bool> loadDatabaseFromJSON(String json) async {
+    // Parse JSON
+    final data = jsonDecode(json);
+
+    // Get all classes
+    final classes = data["classes"] as List<dynamic>;
+
+    // Get all features
+    final features = data["features"] as List<dynamic>;
+
+    // Get all characters
+    final characters = data["characters"] as List<dynamic>;
+
+    // Get all feature connections
+    final featureConnections = data["featureConnections"] as List<dynamic>;
+
+    // Update database in transaction
+    final db = await database;
+
+    db.transaction((txn) async {
+      // Delete data in tables
+      await txn.delete(sqliteCharacterClassTableName);
+      await txn.delete(sqliteCharacterFeaturesTableName);
+      await txn.delete(sqliteCharactersTableName);
+      await txn.delete(sqliteCharacterFeatureConnectionsTableName);
+
+      // Insert classes
+      for (var c in classes) {
+        await txn.insert(sqliteCharacterClassTableName, {
+          "className": c["className"],
+          "classDescription": c["classDescription"],
+          "classHitDie": c["classHitDie"],
+        });
+      }
+
+      // Insert features
+      for (var f in features) {
+        await txn.insert(sqliteCharacterFeaturesTableName, {
+          "featureName": f["featureName"],
+          "featureDescription": f["featureDescription"],
+          "featureType": f["featureType"],
+          "featureLevelAcquire": f["featureLevelAcquire"],
+          "featurePrimaryClass": f["featurePrimaryClass"],
+        });
+      }
+
+      // Insert characters
+      for (var c in characters) {
+        await txn.insert(sqliteCharactersTableName, {
+          "characterName": c["characterName"],
+          "characterClass": c["characterClass"],
+          "characterLevel": c["characterLevel"],
+          "image": Uint8List.fromList([]),
+          //"image": Uint8List(c["image"]),
+        });
+      }
+
+      // Insert feature connections
+      for (var f in featureConnections) {
+        await txn.insert(sqliteCharacterFeatureConnectionsTableName, {
+          "characterId": f["characterId"],
+          "featureId": f["featureId"],
+          "featureMaxLevel": f["featureMaxLevel"],
+          "featureUsed": f["featureUsed"],
+        });
+      }
+
+      return true;
+    }).catchError((e) {
+      print(e);
+      return false;
+    });
+    return true;
+  }
+
+  Future<void> featureAppend(String jsonFeatures) async {
+    final db = await database;
+
+    // Parse JSON
+    final data = jsonDecode(jsonFeatures);
+
+    // Get all features
+    final features = data["features"] as List<dynamic>;
+
+    // Insert features transactionally
+    db.transaction((txn) async {
+      // Insert features
+      for (var f in features) {
+        await txn.insert(sqliteCharacterFeaturesTableName, {
+          "featureName": f["featureName"],
+          "featureDescription": f["featureDescription"],
+          "featureType": f["featureType"] ?? "json-created",
+          "featureLevelAcquire": f["featureLevelAcquire"] ?? "1",
+          "featurePrimaryClass": f["featurePrimaryClass"] ?? "None",
+        });
+      }
+    });
   }
 }

@@ -46,7 +46,7 @@ class _EditClassesState extends State<EditClasses> {
           return Scaffold(
               body: SafeArea(
             child: Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(0),
                 child: ListView(
                   shrinkWrap: true,
                   children: [
@@ -184,7 +184,7 @@ class _EditClassesState extends State<EditClasses> {
           }
 
           return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7,
+              height: MediaQuery.of(context).size.height * 0.5,
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: classes.length,
@@ -212,6 +212,38 @@ class _EditClassesState extends State<EditClasses> {
                                           TextButton(
                                               onPressed: () {
                                                 Navigator.pop(context);
+                                                db
+                                                    .deleteClass(classes[index])
+                                                    .then((value) => {
+                                                          if (value)
+                                                            {
+                                                              // Show notification that class was deleted
+                                                              ScaffoldMessenger
+                                                                      .of(
+                                                                          context)
+                                                                  .showSnackBar(
+                                                                      SnackBar(
+                                                                          content:
+                                                                              Text("${classes[index].className} class was deleted.")))
+                                                            }
+                                                          else
+                                                            {
+                                                              // Show notification that class was not deleted
+                                                              ScaffoldMessenger
+                                                                      .of(
+                                                                          context)
+                                                                  .showSnackBar(
+                                                                      SnackBar(
+                                                                          content:
+                                                                              Text("${classes[index].className} class was not deleted. This class is assigned to at least one character.")))
+                                                            }
+                                                        })
+                                                    .then((value) => {
+                                                          setState(() {
+                                                            futureDB =
+                                                                _initDB();
+                                                          })
+                                                        });
                                               },
                                               child: const Text("Delete"))
                                         ]);
