@@ -1,27 +1,21 @@
-import 'package:firstapp/screens/fab_menu/edit_classes.dart';
-import 'package:firstapp/screens/fab_menu/edit_features.dart';
-import 'package:firstapp/screens/init.dart';
-import 'package:firstapp/screens/fab_menu/settings.dart';
-import 'package:firstapp/screens/intro_screen.dart';
-import 'package:firstapp/screens/welcome_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firstapp/common/services/flutter_service.dart';
+import 'package:firstapp/common/widgets/page_wrapper.dart';
+import 'package:firstapp/dashboard/dashboard_page.dart';
+import 'package:firstapp/firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  // Services registration
+  GetIt.I.registerSingleton<FirebaseService>(FirebaseService());
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(routes: {
-      '/': (context) => const Init(),
-      '/welcome': (context) => const WelcomeScreen(),
-      '/editClasses': (context) => const EditClasses(),
-      '/editFeatures': (context) => const EditFeatures(), 
-      '/settings': (context) => const Settings(),
-      '/intro-screen': (context) => const IntroScreen(),
-    });
-  }
+  runApp(const MaterialApp(
+      title: 'DnD App',
+      home: PageWrapper(
+        child: DashboardPage(),
+      )));
 }
