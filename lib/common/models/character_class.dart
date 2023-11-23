@@ -1,4 +1,5 @@
 enum CharacterClass {
+  none,
   barbarian,
   bard,
   cleric,
@@ -11,6 +12,6 @@ enum CharacterClass {
   rogue,
   sorcerer,
   warlock,
-  wizard,
-  none
+  wizard
+
 }

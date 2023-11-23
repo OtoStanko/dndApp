@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firstapp/common/services/character_service.dart';
 import 'package:firstapp/common/services/flutter_service.dart';
 import 'package:firstapp/common/widgets/page_wrapper.dart';
 import 'package:firstapp/dashboard/dashboard_page.dart';
@@ -12,6 +13,7 @@ void main() async {
 
   // Services registration
   GetIt.I.registerSingleton<FirebaseService>(FirebaseService());
+  GetIt.I.registerSingleton<CharacterService>(CharacterService());
 
   runApp(const MaterialApp(
       title: 'DnD App',

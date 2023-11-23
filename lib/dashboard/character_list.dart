@@ -1,5 +1,4 @@
 import 'package:firstapp/common/models/character.dart';
-import 'package:firstapp/common/models/character_class.dart';
 import 'package:firstapp/common/services/flutter_service.dart';
 import 'package:firstapp/common/utils.dart';
 import 'package:firstapp/common/widgets/page_wrapper.dart';
@@ -38,12 +37,8 @@ class CharacterList extends StatelessWidget {
                   trailing: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
                     child: character.photoUrl.isNotEmpty
-                        ? Image.network(
-                            character.photoUrl,
-                            width: 48,
-                            height: 48,
-                          )
-                        : Text('No photo'),
+                        ? _buildImage(character)
+                        : const Text('No photo'),
                   ),
                   onTap: () {
                     Navigator.push(
@@ -54,10 +49,45 @@ class CharacterList extends StatelessWidget {
                                     characterId: character.id))));
                   },
                   onLongPress: () {
-                    service.updateCharacterPhoto(character.id);
+                    _deleteCharacter(context, character);
+                    // service.updateCharacterPhoto(character.id);
                   },
                 ),
             ])),
+          );
+        });
+  }
+
+  Image _buildImage(Character character) {
+    return Image.network(character.photoUrl,
+        width: 48,
+        height: 48,
+        errorBuilder: (context, error, stackTrace) {
+          GetIt.I.get<FirebaseService>().removeCharacterPhoto(character.id);
+          return const Text('No photo');
+        });
+  }
+
+  void _deleteCharacter(BuildContext context, Character character) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Delete character'),
+            content: const Text('Are you sure you want to delete this character?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () {
+                    GetIt.I.get<FirebaseService>().deleteCharacter(character.id);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Delete')),
+            ],
           );
         });
   }

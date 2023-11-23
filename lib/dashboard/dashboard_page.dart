@@ -1,4 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firstapp/add_character/add_character_page.dart';
+import 'package:firstapp/common/models/character.dart';
 import 'package:firstapp/common/services/flutter_service.dart';
 import 'package:firstapp/common/widgets/navbar.dart';
 import 'package:firstapp/dashboard/character_list.dart';
@@ -29,11 +30,24 @@ class DashboardPage extends StatelessWidget {
             },
           )
         ]),
+        const SizedBox(height: 16.0),
         const Greeting(),
         const CharacterList(),
-        ElevatedButton(onPressed: () {
-          print('Add character');
-        }, child: const Text('Add character') )
+        ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PageWrapper(
+                            child: AddCharacterPage(),
+                          ))).then((value) {
+                final character = value as Character;
+                final service = GetIt.instance<FirebaseService>();
+                service.createCharacter(character);
+                return;
+              });
+            },
+            child: const Text('Add character'))
       ],
     );
   }

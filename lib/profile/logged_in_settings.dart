@@ -31,8 +31,8 @@ class LoggedInSettings extends StatelessWidget {
           title: const Text('Photo'),
           trailing: ClipRRect(
               borderRadius: BorderRadius.circular(25),
-              child: user.photoURL!.isNotEmpty ? Image.network(
-                user.photoURL!,
+              child: user.photoURL != null ? Image.network(
+                user.photoURL ?? 'https://via.placeholder.com/50',
                 width: 50,
                 height: 50,
                 fit: BoxFit.fitWidth,
