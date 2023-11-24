@@ -61,18 +61,18 @@ class FirebaseService {
         return CharacterStats();
       }
       final stats = CharacterStats.fromMap(data);
-      return CharacterStats();
+      return stats;
     });
   }
 
   Stream<Character> getFullCharacterById(String characterId) {
     final character = getCharacterById(characterId);
     final stats = getCharacterStats(characterId);
-    // Combine the two streams, and return the character with the stats
-    return stats.asyncMap((stats) async {
-      var c = await character.first;
-      c = c.copyWith(stats: stats);
-      return c;
+
+    return stats.asyncMap((event) async {
+      var characterData = await character.first;
+      characterData = characterData.copyWith(stats: event);
+      return characterData;
     });
   }
 
@@ -276,10 +276,13 @@ class FirebaseService {
   }
 
   // Stats
-  int lastValue = -1;
+  Ability abilityEdit = Ability(name: '', value: 10, shortname: '');
 
-  void setLastValue(int value) {
-    lastValue = value;
+  updateAbilityEdit(Ability ability) {
+    abilityEdit = ability;
+  }
+  Ability getAbilityEdit() {
+    return abilityEdit;
   }
 
   Future<void> updateAbility(String characterId, Ability ability) async {
@@ -288,9 +291,16 @@ class FirebaseService {
       print("User is not logged in");
       return;
     }
-    final doc = await statsCollection.doc(characterId).get();
-    final abilities = doc.data() as Map<String, dynamic>;
-    final index = abilities as Map<String, Ability>;
-    //await statsCollection.doc(characterId).update(abilities);
+    final statsDoc = await statsCollection.doc(characterId).get();
+    if (!statsDoc.exists) {
+      await statsCollection.doc(characterId).set({});
+    }
+    final data = statsDoc.data();
+    if (data == null || data.isEmpty) {
+      return;
+    }
+    final stats = CharacterStats.fromMap(data);
+    stats.updateAbility(ability);
+    await statsCollection.doc(characterId).update(stats.toMap());
   }
 }

@@ -1,11 +1,10 @@
-import 'package:firstapp/common/utils.dart';
+import 'package:firstapp/common/models/ability.dart';
 import 'package:flutter/material.dart';
 
 class EditSkill extends StatefulWidget {
-  final int value;
+  final Ability ability;
   final Function onChange;
-
-  const EditSkill({super.key, this.value = 0, required this.onChange});
+  const EditSkill({super.key, required this.ability, required this.onChange});
 
   @override
   State<EditSkill> createState() => _EditSkillState();
@@ -13,61 +12,35 @@ class EditSkill extends StatefulWidget {
 
 class _EditSkillState extends State<EditSkill> {
   late final TextEditingController valueController;
+  bool isProficient = false;
 
   @override
   void initState() {
     super.initState();
-    valueController = TextEditingController(text: '${widget.value}');
-    // Clamp the value between 0 and 30
-    valueController.addListener(() {
-      final newValue = int.parse(valueController.text);
-      if (newValue < 0) {
-        valueController.text = '0';
-      } else if (newValue > 30) {
-        valueController.text = '30';
-      }
-    });
-    valueController.addListener(() {
-      final newValue = int.parse(valueController.text);
-      widget.onChange(newValue);
+    valueController = TextEditingController(text: '${widget.ability.value}');
+    setState(() {
+      isProficient = widget.ability.isProficient;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Modifier: ${digitPrefix(calculateModifier(int.parse(valueController.text)))}'),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                final newValue = int.parse(valueController.text) - 1;
-                setState(() {
-                  valueController.text = '$newValue';
-                });
-              },
-              child: const Icon(Icons.remove),
-            ),
-            Text(
-              valueController.text,
-              style: const TextStyle(fontSize: 24),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newValue = int.parse(valueController.text) + 1;
-                setState(() {
-                  valueController.text = '$newValue';
-                });
-              },
-              child: const Icon(Icons.add),
-            ),
-          ],
+        Checkbox(
+          value: isProficient,
+          onChanged: (newValue) {
+            setState(() {
+              final newAbility = widget.ability.copyWith(
+                  isProficient: newValue ?? false,
+                  value: int.parse(valueController.text));
+              isProficient = newValue ?? false;
+              widget.onChange(newAbility);
+            });
+          },
         ),
+        const Text('Proficient'),
       ],
     );
   }

@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:firstapp/common/models/ability.dart';
 import 'package:firstapp/common/models/dice.dart';
 import 'package:firstapp/common/models/dice_throw.dart';
+import 'package:flutter/foundation.dart';
 
 class CharacterStats {
   // Fixed stats
@@ -14,7 +15,7 @@ class CharacterStats {
   late DiceThrow _hitDice = DiceThrow(0, Dice.d0);
   late int _speed = 0;
   late int _inspiration = 0;
-  late int _proficiencyBonus = 0;
+  late int _proficiencyBonus = 2;
   late int _deathSavesSuccesses = 0;
   late int _deathSavesFailures = 0;
 
@@ -306,50 +307,51 @@ class CharacterStats {
       Ability? stealth,
       Ability? survival}) {
     return CharacterStats(
-      level: level ?? _level,
-      experiencePoints: experiencePoints ?? _experiencePoints,
-      healthPoints: healthPoints ?? _healthPoints,
-      temporaryHealthPoints: temporaryHealthPoints ?? _temporaryHealthPoints,
-      maxHealthPoints: maxHealthPoints ?? _maxHealthPoints,
-      hitDice: hitDice ?? _hitDice,
-      speed: speed ?? _speed,
-      inspiration: inspiration ?? _inspiration,
-      proficiencyBonus: proficiencyBonus ?? _proficiencyBonus,
-      deathSavesSuccesses: deathSavesSuccesses ?? _deathSavesSuccesses,
-      deathSavesFailures: deathSavesFailures ?? _deathSavesFailures,
-      initiative: initiative ?? _initiative,
-      armorClass: armorClass ?? _armorClass,
-      strength: strength ?? _strength,
-      dexterity: dexterity ?? _dexterity,
-      constitution: constitution ?? _constitution,
-      intelligence: intelligence ?? _intelligence,
-      wisdom: wisdom ?? _wisdom,
-      charisma: charisma ?? _charisma,
-      strengthSavingThrow: strengthSavingThrow ?? _strengthSavingThrow,
-      dexteritySavingThrow: dexteritySavingThrow ?? _dexteritySavingThrow,
-      constitutionSavingThrow: constitutionSavingThrow ?? _constitutionSavingThrow,
-      intelligenceSavingThrow: intelligenceSavingThrow ?? _intelligenceSavingThrow,
-      wisdomSavingThrow: wisdomSavingThrow ?? _wisdomSavingThrow,
-      charismaSavingThrow: charismaSavingThrow ?? _charismaSavingThrow,
-      acrobatics: acrobatics ?? _acrobatics,
-      animalHandling: animalHandling ?? _animalHandling,
-      arcana: arcana ?? _arcana,
-      athletics: athletics ?? _athletics,
-      deception: deception ?? _deception,
-      history: history ?? _history,
-      insight: insight ?? _insight,
-      intimidation: intimidation ?? _intimidation,
-      investigation: investigation ?? _investigation,
-      medicine: medicine ?? _medicine,
-      nature: nature ?? _nature,
-      perception: perception ?? _perception,
-      performance: performance ?? _performance,
-      persuasion: persuasion ?? _persuasion,
-      religion: religion ?? _religion,
-      sleightOfHand: sleightOfHand ?? _sleightOfHand,
-      stealth: stealth ?? _stealth,
-      survival: survival ?? _survival
-    );
+        level: level ?? _level,
+        experiencePoints: experiencePoints ?? _experiencePoints,
+        healthPoints: healthPoints ?? _healthPoints,
+        temporaryHealthPoints: temporaryHealthPoints ?? _temporaryHealthPoints,
+        maxHealthPoints: maxHealthPoints ?? _maxHealthPoints,
+        hitDice: hitDice ?? _hitDice,
+        speed: speed ?? _speed,
+        inspiration: inspiration ?? _inspiration,
+        proficiencyBonus: proficiencyBonus ?? _proficiencyBonus,
+        deathSavesSuccesses: deathSavesSuccesses ?? _deathSavesSuccesses,
+        deathSavesFailures: deathSavesFailures ?? _deathSavesFailures,
+        initiative: initiative ?? _initiative,
+        armorClass: armorClass ?? _armorClass,
+        strength: strength ?? _strength,
+        dexterity: dexterity ?? _dexterity,
+        constitution: constitution ?? _constitution,
+        intelligence: intelligence ?? _intelligence,
+        wisdom: wisdom ?? _wisdom,
+        charisma: charisma ?? _charisma,
+        strengthSavingThrow: strengthSavingThrow ?? _strengthSavingThrow,
+        dexteritySavingThrow: dexteritySavingThrow ?? _dexteritySavingThrow,
+        constitutionSavingThrow:
+            constitutionSavingThrow ?? _constitutionSavingThrow,
+        intelligenceSavingThrow:
+            intelligenceSavingThrow ?? _intelligenceSavingThrow,
+        wisdomSavingThrow: wisdomSavingThrow ?? _wisdomSavingThrow,
+        charismaSavingThrow: charismaSavingThrow ?? _charismaSavingThrow,
+        acrobatics: acrobatics ?? _acrobatics,
+        animalHandling: animalHandling ?? _animalHandling,
+        arcana: arcana ?? _arcana,
+        athletics: athletics ?? _athletics,
+        deception: deception ?? _deception,
+        history: history ?? _history,
+        insight: insight ?? _insight,
+        intimidation: intimidation ?? _intimidation,
+        investigation: investigation ?? _investigation,
+        medicine: medicine ?? _medicine,
+        nature: nature ?? _nature,
+        perception: perception ?? _perception,
+        performance: performance ?? _performance,
+        persuasion: persuasion ?? _persuasion,
+        religion: religion ?? _religion,
+        sleightOfHand: sleightOfHand ?? _sleightOfHand,
+        stealth: stealth ?? _stealth,
+        survival: survival ?? _survival);
   }
 
   int get level => _level;
@@ -477,6 +479,22 @@ class CharacterStats {
         _survival,
       ];
 
+  Map<String, dynamic> get fixedStats => {
+    'level': _level,
+    'experiencePoints': _experiencePoints,
+    'healthPoints': _healthPoints,
+    'temporaryHealthPoints': _temporaryHealthPoints,
+    'maxHealthPoints': _maxHealthPoints,
+    'hitDice': _hitDice,
+    'speed': _speed,
+    'inspiration': _inspiration,
+    'proficiencyBonus': _proficiencyBonus,
+    'deathSavesSuccesses': _deathSavesSuccesses,
+    'deathSavesFailures': _deathSavesFailures,
+    'initiative': _initiative,
+    'armorClass': _armorClass,
+  };
+
   List<Ability> get allAbilities => [
         ...abilities,
         ...savingThrows,
@@ -589,5 +607,100 @@ class CharacterStats {
       stealth: Ability.fromMap(map['stealth'] as Map<String, dynamic>),
       survival: Ability.fromMap(map['survival'] as Map<String, dynamic>),
     );
+  }
+
+  void updateAbility(Ability ability) {
+    switch (ability.name) {
+      case 'Strength':
+        _strength = ability;
+        break;
+      case 'Dexterity':
+        _dexterity = ability;
+        break;
+      case 'Constitution':
+        _constitution = ability;
+        break;
+      case 'Intelligence':
+        _intelligence = ability;
+        break;
+      case 'Wisdom':
+        _wisdom = ability;
+        break;
+      case 'Charisma':
+        _charisma = ability;
+        break;
+      case 'Strength Saving Throw':
+        _strengthSavingThrow = ability;
+        break;
+      case 'Dexterity Saving Throw':
+        _dexteritySavingThrow = ability;
+        break;
+      case 'Constitution Saving Throw':
+        _constitutionSavingThrow = ability;
+        break;
+      case 'Intelligence Saving Throw':
+        _intelligenceSavingThrow = ability;
+        break;
+      case 'Wisdom Saving Throw':
+        _wisdomSavingThrow = ability;
+        break;
+      case 'Charisma Saving Throw':
+        _charismaSavingThrow = ability;
+        break;
+      case 'Acrobatics':
+        _acrobatics = ability;
+        break;
+      case 'Animal Handling':
+        _animalHandling = ability;
+        break;
+      case 'Arcana':
+        _arcana = ability;
+        break;
+      case 'Athletics':
+        _athletics = ability;
+        break;
+      case 'Deception':
+        _deception = ability;
+        break;
+      case 'History':
+        _history = ability;
+        break;
+      case 'Insight':
+        _insight = ability;
+        break;
+      case 'Intimidation':
+        _intimidation = ability;
+        break;
+      case 'Investigation':
+        _investigation = ability;
+        break;
+      case 'Medicine':
+        _medicine = ability;
+        break;
+      case 'Nature':
+        _nature = ability;
+        break;
+      case 'Perception':
+        _perception = ability;
+        break;
+      case 'Performance':
+        _performance = ability;
+        break;
+      case 'Persuasion':
+        _persuasion = ability;
+        break;
+      case 'Religion':
+        _religion = ability;
+        break;
+      case 'Sleight of Hand':
+        _sleightOfHand = ability;
+        break;
+      case 'Stealth':
+        _stealth = ability;
+        break;
+      case 'Survival':
+        _survival = ability;
+        break;
+    }
   }
 }

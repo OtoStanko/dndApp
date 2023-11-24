@@ -7,6 +7,10 @@ class Ability {
   final bool isSkill;
   late int modifier;
 
+  int Function(int proficiencyBonus) get valueWithProficiency => (int proficiencyBonus) {
+    return value + (isProficient ? proficiencyBonus : 0);
+  };
+
   Ability(
       {required this.name,
       required this.shortname,
