@@ -1,5 +1,5 @@
 import 'package:firstapp/common/models/character.dart';
-import 'package:firstapp/view_character/dialogs.dart';
+import 'package:firstapp/view_character/common/dialogs.dart';
 import 'package:flutter/material.dart';
 
 class ViewCharacterStats extends StatelessWidget {
@@ -13,9 +13,9 @@ class ViewCharacterStats extends StatelessWidget {
         ? " (+ ${character.stats.temporaryHealthPoints})"
         : "";
 
-    return Column(children: [
+    return ExpansionTile(title: const Text("Stats"), children: [
       ListTile(
-        title: const Text("HP"),
+        title: const Text("Health Points"),
         trailing: Text(
             "${character.stats.healthPoints}/${character.stats.maxHealthPoints}$tmpHp",
             style: const TextStyle(fontSize: 24)),
@@ -24,32 +24,40 @@ class ViewCharacterStats extends StatelessWidget {
         },
       ),
       ListTile(
-          title: const Text("AC"),
+        title: const Text("Hit Dice"),
+        trailing: Text("${character.stats.hitDice}",
+            style: const TextStyle(fontSize: 24)),
+        onLongPress: () {
+          showEditHitDiceDialog(context, character);
+        },
+      ),
+      ListTile(
+          title: const Text("Armor Class"),
           trailing: Text("${character.stats.armorClass}",
               style: const TextStyle(fontSize: 24)),
           onLongPress: () {
-            print("Long press");
+            showEditArmorClassDialog(context, character);
           }),
       ListTile(
           title: const Text("Speed"),
           trailing: Text("${character.stats.speed}ft",
               style: const TextStyle(fontSize: 24)),
           onLongPress: () {
-            print("Long press");
+            showEditSpeedDialog(context, character);
           }),
       ListTile(
           title: const Text("Initiative"),
           trailing: Text("${character.stats.initiative}",
               style: const TextStyle(fontSize: 24)),
           onLongPress: () {
-            print("Long press");
+            showEditInitiativeDialog(context, character);
           }),
       ListTile(
           title: const Text("Proficiency"),
           trailing: Text("+${character.stats.proficiencyBonus}",
               style: const TextStyle(fontSize: 24)),
           onLongPress: () {
-            print("Long press");
+            showEditProficiencyDialog(context, character);
           }),
     ]);
   }

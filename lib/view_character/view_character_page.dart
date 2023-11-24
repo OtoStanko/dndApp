@@ -2,7 +2,8 @@ import 'package:firstapp/common/models/character.dart';
 import 'package:firstapp/common/services/flutter_service.dart';
 import 'package:firstapp/common/utils.dart';
 import 'package:firstapp/common/widgets/navbar.dart';
-import 'package:firstapp/view_character/image_drawer.dart';
+import 'package:firstapp/view_character/death_saves/view_death_saves.dart';
+import 'package:firstapp/view_character/stats/image_drawer.dart';
 import 'package:firstapp/view_character/view_character_list.dart';
 import 'package:firstapp/view_character/view_character_stats.dart';
 import 'package:flutter/material.dart';
@@ -30,25 +31,27 @@ class ViewCharacterPage extends StatelessWidget {
             );
           }
           final character = snapshot.data as Character;
-          return Column(
-            children: [
-              Navbar(title: character.name),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.9,
-                child: SingleChildScrollView(
-                    child: Column(children: [
-                  ImageDrawer(character: character),
-                  Text(character.name, style: const TextStyle(fontSize: 24)),
-                  Text(capitalise(character.characterClass.name),
-                      style: const TextStyle(fontSize: 18, color: Colors.grey)),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  ViewCharacterStats(character: character),
-                  const Divider(),
-                  ViewCharacterList(character: character)
-                ])),
-              )
-            ],
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                Navbar(title: character.name),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  child: SingleChildScrollView(
+                      child: Column(children: [
+                    ImageDrawer(character: character),
+                    Text(character.name, style: const TextStyle(fontSize: 24)),
+                    Text("Level ${character.stats.level} ${capitalise(character.characterClass.name)}",
+                        style: const TextStyle(fontSize: 18, color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    ViewCharacterStats(character: character),
+                    ViewDeathSaves(character: character),
+                    ViewCharacterList(character: character)
+                  ])),
+                )
+              ],
+            ),
           );
         });
   }

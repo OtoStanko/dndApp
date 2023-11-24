@@ -99,8 +99,7 @@ class FirebaseService {
         email: email,
         password: password,
       );
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -242,7 +241,6 @@ class FirebaseService {
       return;
     }
     final doc = await characterCollection.doc(id).get();
-    Map<String, dynamic>? docData;
     if (!doc.exists) {
       await characterCollection.doc(id).set({});
     }
@@ -281,6 +279,7 @@ class FirebaseService {
   updateAbilityEdit(Ability ability) {
     abilityEdit = ability;
   }
+
   Ability getAbilityEdit() {
     return abilityEdit;
   }
@@ -302,5 +301,69 @@ class FirebaseService {
     final stats = CharacterStats.fromMap(data);
     stats.updateAbility(ability);
     await statsCollection.doc(characterId).update(stats.toMap());
+  }
+
+  Map<String, dynamic> statsEdit = {};
+
+  Map<String, dynamic> getStatsEdit() {
+    return statsEdit;
+  }
+
+  Future<void> updateStatsEdit(Character character) async {
+    final id = FirebaseAuth.instance.currentUser?.uid;
+    if (id == null) {
+      print("User is not logged in");
+      return;
+    }
+    final statsDoc = await statsCollection.doc(character.id).get();
+    if (!statsDoc.exists) {
+      await statsCollection.doc(character.id).set({});
+    }
+    final data = statsDoc.data();
+    if (data == null || data.isEmpty) {
+      return;
+    }
+    final newStats = character.stats.copyWith(
+        healthPoints: statsEdit['healthPoints'],
+        temporaryHealthPoints: statsEdit['temporaryHealthPoints'],
+        maxHealthPoints: statsEdit['maxHealthPoints'],
+        armorClass: statsEdit['armorClass'],
+        initiative: statsEdit['initiative'],
+        hitDice: statsEdit['hitDice'],
+        speed: statsEdit['speed'],
+        proficiencyBonus: statsEdit['proficiencyBonus']);
+    await statsCollection.doc(character.id).update(newStats.toMap());
+  }
+
+  void clearEditing() {
+    abilityEdit = Ability(name: '', value: 10, shortname: '');
+    statsEdit = {};
+  }
+
+  Future<void> updateDeathSaves(
+      {required Character character,
+      bool isSuccess = true,
+      int value = 1}) async {
+    final id = FirebaseAuth.instance.currentUser?.uid;
+    if (id == null) {
+      print("User is not logged in");
+      return;
+    }
+    final statsDoc = await statsCollection.doc(character.id).get();
+    if (!statsDoc.exists) {
+      await statsCollection.doc(character.id).set({});
+    }
+    final data = statsDoc.data();
+    if (data == null || data.isEmpty) {
+      return;
+    }
+    final newStats = character.stats.copyWith(
+        deathSavesSuccesses: isSuccess
+            ? character.stats.deathSavesSuccesses + value
+            : character.stats.deathSavesSuccesses,
+        deathSavesFailures: !isSuccess
+            ? character.stats.deathSavesFailures + value
+            : character.stats.deathSavesFailures);
+    await statsCollection.doc(character.id).update(newStats.toMap());
   }
 }

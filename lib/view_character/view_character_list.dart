@@ -1,6 +1,6 @@
 import 'package:firstapp/common/models/character.dart';
 import 'package:firstapp/common/utils.dart';
-import 'package:firstapp/view_character/dialogs.dart';
+import 'package:firstapp/view_character/common/dialogs.dart';
 import 'package:firstapp/view_character/view_proficient_value.dart';
 import 'package:flutter/material.dart';
 
